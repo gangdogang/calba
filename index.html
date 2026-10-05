@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0a7d3e">
+<meta name="format-detection" content="telephone=no,date=no">
+<meta name="robots" content="noindex">
+<title>근무표 캘린더</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-180.png">
+<style>
+:root {
+  --bg: #f3f6f2; --card: #ffffff; --ink: #14201a; --muted: #5d6b63; --line: #e1e7e1;
+  --brand: #0a7d3e; --brand-ink: #ffffff; --soft: #e7f4ec;
+  --warn-bg: #fff5d1; --warn-ink: #7a5600; --err-bg: #fde8e6; --err-ink: #9b1c12;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1512; --card: #18201c; --ink: #eaf1ec; --muted: #9aa9a0; --line: #2a352f;
+    --brand: #2fbf6b; --brand-ink: #062313; --soft: #17301f;
+    --warn-bg: #3a2f0a; --warn-ink: #ffd866; --err-bg: #3d1512; --err-ink: #ffb4ab;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+main {
+  max-width: 560px; margin: 0 auto;
+  padding: calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+}
+header h1 { font-size: 24px; line-height: 1.25; margin: 0 0 4px; letter-spacing: -0.02em; }
+header p { margin: 0 0 18px; color: var(--muted); font-size: 15px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
+.card h2 { font-size: 16px; margin: 0 0 10px; }
+label.field { display: block; font-size: 13px; color: var(--muted); font-weight: 600; }
+label.field + label.field { margin-top: 12px; }
+input[type=text], input[type=date], input[type=time], select {
+  display: block; width: 100%; margin-top: 6px; padding: 12px 14px; min-height: 48px;
+  font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 12px; -webkit-appearance: none; appearance: none;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible, .btn:focus-within {
+  outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 2px;
+}
+details.more { margin-top: 12px; }
+details > summary { cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 600; list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "▸ "; }
+details[open] > summary::before { content: "▾ "; }
+details.more > div { margin-top: 12px; }
+.btn, button {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 54px;
+  padding: 12px 16px; font: inherit; font-weight: 700; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 14px; cursor: pointer; text-align: center;
+}
+button.primary, .btn.primary { background: var(--brand); color: var(--brand-ink); border-color: transparent; }
+button:disabled { opacity: 0.45; cursor: default; }
+button.link { width: auto; min-height: 0; padding: 6px 2px; border: 0; background: none; color: var(--brand); font-weight: 600; }
+.pick { display: grid; gap: 10px; }
+.pick input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.pulse { animation: pulse 1.4s ease-in-out 4; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--brand) 28%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+.hint { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+.notice { border-radius: 12px; padding: 10px 12px; font-size: 14px; margin: 0 0 12px; }
+.notice.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.notice.err { background: var(--err-bg); color: var(--err-ink); }
+.notice.ok { background: var(--soft); color: var(--ink); }
+#progress .bar { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+#progress .bar i { display: block; height: 100%; width: 0; background: var(--brand); border-radius: 99px; transition: width .25s; }
+#progressLabel { font-weight: 600; }
+#preview { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); margin-bottom: 12px; }
+ul.shifts { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 10px; }
+ul.shifts li { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: var(--bg); }
+ul.shifts li.flag { border-color: color-mix(in srgb, var(--warn-ink) 45%, transparent); }
+.row { display: flex; align-items: center; gap: 12px; }
+.row input[type=checkbox] { width: 24px; height: 24px; flex: none; margin: 0; accent-color: var(--brand); }
+.when { flex: 1; min-width: 0; }
+.when b { display: block; font-size: 17px; letter-spacing: -0.01em; }
+.when span { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--warn-bg); color: var(--warn-ink); margin: 8px 6px 0 0; }
+canvas.thumb { display: block; max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; border: 1px solid var(--line); }
+.edit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.edit label.field + label.field { margin-top: 0; }
+.edit .wide { grid-column: 1 / -1; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chips button { width: auto; min-height: 40px; padding: 6px 14px; border-radius: 99px; font-weight: 600; background: var(--card); }
+ol.steps { margin: 10px 0 0; padding-left: 20px; font-size: 14px; color: var(--ink); }
+ol.steps li { margin-bottom: 6px; }
+code.url { display: block; word-break: break-all; font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-top: 8px; }
+#toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  max-width: min(92vw, 520px); background: var(--ink); color: var(--bg); padding: 12px 16px; border-radius: 14px;
+  font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10; text-align: center;
+}
+#toast.show { opacity: 1; }
+.card h3 { font-size: 14px; margin: 14px 0 0; }
+.links { display: grid; gap: 8px; }
+.links a.btn { text-decoration: none; min-height: 48px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.notice button.link { display: block; margin-top: 4px; color: inherit; text-decoration: underline; }
+.foot { font-size: 13px; color: var(--muted); text-align: center; margin: 16px 0 0; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>근무표 → 캘린더</h1>
+    <p>스케줄표 이미지에서 내 근무만 찾아 캘린더에 넣어요.</p>
+  </header>
+
+  <div id="inapp" class="notice warn" hidden>
+    카카오톡 같은 앱 안에서 열면 캘린더 추가가 안 될 수 있어요. Safari나 Chrome으로 열어 주세요.
+    <button id="openExternal" class="link" type="button" hidden>기본 브라우저로 열기</button>
+  </div>
+
+  <section class="card">
+    <label class="field">내 이름 (스케줄표에 적힌 그대로)
+      <input id="name" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="예: 홍길동" enterkeyhint="done">
+    </label>
+    <details class="more">
+      <summary>일정 제목 · 알림 설정</summary>
+      <div>
+        <label class="field">캘린더에 표시할 제목
+          <input id="title" type="text" autocomplete="off" placeholder="서브웨이 알바">
+        </label>
+        <label class="field">알림
+          <select id="alarm">
+            <option value="0">없음</option>
+            <option value="30">30분 전</option>
+            <option value="60">1시간 전</option>
+            <option value="120">2시간 전</option>
+          </select>
+        </label>
+      </div>
+    </details>
+  </section>
+
+  <section class="card pick">
+    <button id="pasteBtn" class="primary" type="button">복사한 스케줄표 붙여넣기</button>
+    <label class="btn" for="file">사진에서 선택<input id="file" type="file" accept="image/*"></label>
+  </section>
+
+  <section id="progress" class="card" hidden aria-live="polite">
+    <div id="progressLabel">준비 중…</div>
+    <div class="bar"><i id="progressBar"></i></div>
+    <p class="hint">처음 한 번은 글자 인식 엔진을 내려받느라 조금 더 걸려요.</p>
+  </section>
+
+  <p id="error" class="notice err" hidden role="alert"></p>
+
+  <section id="result" class="card" hidden>
+    <h2 id="resultTitle"></h2>
+    <canvas id="preview" aria-hidden="true"></canvas>
+    <p id="resultNote" class="notice warn" hidden></p>
+    <ul id="shifts" class="shifts"></ul>
+    <div id="namePicker" hidden>
+      <p class="hint" style="margin-top:0">표에서 읽은 이름이에요. 본인 이름을 누르면 바로 찾아요.</p>
+      <div id="chips" class="chips"></div>
+    </div>
+    <button id="addBtn" class="primary" type="button" hidden>캘린더에 추가</button>
+    <p id="addHint" class="hint" hidden></p>
+    <button id="shareBtn" class="link" type="button" hidden>캘린더 화면이 안 뜨면: 파일로 내보내기</button>
+    <details id="gcal" class="more" hidden>
+      <summary>구글 캘린더 앱을 쓴다면</summary>
+      <div>
+        <p class="hint" style="margin-top:0">근무를 하나씩 눌러 저장하세요.</p>
+        <div id="gcalLinks" class="links"></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>앱처럼 쓰는 방법 (아이폰 · 갤럭시)</summary>
+      <h3>아이폰</h3>
+      <ol class="steps">
+        <li>Safari에서 이 페이지를 열고 공유 버튼 → “홈 화면에 추가”.</li>
+        <li>매주: 카톡에서 스케줄표 이미지를 복사(공유 → 복사)한 뒤 이 앱에서 “붙여넣기”.</li>
+      </ol>
+      <h3>갤럭시(안드로이드)</h3>
+      <ol class="steps">
+        <li>Chrome에서 이 페이지를 열고 메뉴(⋮) → “홈 화면에 추가” → “설치”.</li>
+        <li>매주: 카톡에서 스케줄표 이미지를 공유 → 앱 목록에서 “근무표”를 고르면 바로 읽어요.</li>
+      </ol>
+      <p class="hint">어느 폰이든 이미지를 저장해 두고 “사진에서 선택”으로 골라도 돼요.</p>
+      <details class="more">
+        <summary>아이폰 공유 버튼에서 바로 열기 (단축어)</summary>
+        <div>
+          <p class="hint" style="margin-top:0">단축어 앱에서 새 단축어를 만들고 “클립보드에 복사”, “URL 열기” 동작을 차례로 넣은 뒤, 세부사항에서 “공유 시트에서 보기”를 켜고 받는 종류를 “이미지”로 두세요. URL에는 아래 주소를 넣어요.</p>
+          <code id="shortcutUrl" class="url"></code>
+          <button id="copyUrl" class="link" type="button">주소 복사</button>
+        </div>
+      </details>
+    </details>
+  </section>
+  <p class="foot">스케줄표 이미지는 이 기기 안에서만 읽고, 어디에도 전송하지 않아요.</p>
+</main>
+<div id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
+<script>
+(() => {
+'use strict';
+
+const $ = (s) => document.querySelector(s);
+const el = (tag, props = {}, ...kids) => {
+  const n = Object.assign(document.createElement(tag), props);
+  for (const k of kids) n.append(k);
+  return n;
+};
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
+const quartile = (a) => [...a].sort((x, y) => x - y)[a.length >> 2];
+const pad2 = (n) => String(n).padStart(2, '0');
+
+class UserError extends Error {}
+
+const UA = navigator.userAgent;
+const isAndroid = /Android/i.test(UA);
+const isIOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+/* ---------- settings ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('shiftcal.' + k); return v === null ? d : v; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('shiftcal.' + k, v); } catch { /* private mode */ } },
+};
+// The name travels in the URL hash (never sent to the server) so a home-screen
+// icon or a Shortcut can carry it even when Safari has cleared site storage.
+const hash = new URLSearchParams(location.hash.slice(1));
+const nameEl = $('#name'), titleEl = $('#title'), alarmEl = $('#alarm');
+nameEl.value = (hash.get('name') || store.get('name', '')).trim();
+titleEl.value = store.get('title', '서브웨이 알바');
+alarmEl.value = store.get('alarm', '60');
+if (hash.get('name')) store.set('name', nameEl.value);
+
+function appUrl() {
+  const p = new URLSearchParams();
+  if (nameEl.value.trim()) p.set('name', nameEl.value.trim());
+  p.set('paste', '1');
+  return location.origin + location.pathname + '#' + p.toString();
+}
+function syncUrl() {
+  $('#shortcutUrl').textContent = appUrl();
+  const p = new URLSearchParams();
+  if (nameEl.value.trim()) p.set('name', nameEl.value.trim());
+  try { history.replaceState(null, '', location.pathname + (p.toString() ? '#' + p.toString() : '')); } catch { /* file:// */ }
+}
+
+/* ---------- small UI helpers ---------- */
+let toastTimer;
+function toast(msg, ms = 3200) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+}
+function setProgress(frac, label) {
+  $('#progress').hidden = false;
+  $('#progressBar').style.width = Math.round(clamp(frac, 0, 1) * 100) + '%';
+  if (label) $('#progressLabel').textContent = label;
+}
+function showError(msg) { const e = $('#error'); e.textContent = msg; e.hidden = !msg; }
+
+/* ---------- OCR engine ---------- */
+let ocrReady = null, engineLoaded = false;
+let phase = { base: 0.15, span: 0.5, label: '스케줄표 읽는 중…' };
+function onOcrLog(m) {
+  if (typeof m.progress !== 'number' || !busy) return;
+  if (m.status === 'recognizing text') setProgress(phase.base + phase.span * m.progress, phase.label);
+  else if (!engineLoaded) setProgress(0.02 + 0.12 * m.progress, '글자 인식 엔진 불러오는 중…');
+}
+function initOcr() {
+  if (!ocrReady) {
+    ocrReady = (async () => {
+      if (!window.Tesseract) throw new UserError('글자 인식 엔진을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.');
+      const w = await Tesseract.createWorker('kor', 1, { logger: onOcrLog });
+      engineLoaded = true;
+      return w;
+    })();
+    ocrReady.catch(() => { ocrReady = null; });
+  }
+  return ocrReady;
+}
+
+/* ---------- image helpers ---------- */
+async function loadBitmap(blob) {
+  if ('createImageBitmap' in window) {
+    try { return await createImageBitmap(blob); } catch { /* fall through */ }
+  }
+  const url = URL.createObjectURL(blob);
+  try { const img = new Image(); img.src = url; await img.decode(); return img; }
+  catch { throw new UserError('이미지를 열지 못했어요. 다른 이미지로 시도해 주세요.'); }
+  finally { URL.revokeObjectURL(url); }
+}
+const dim = (src) => ({ W: src.naturalWidth || src.width, H: src.naturalHeight || src.height });
+
+// drawImage with the source rect clipped to the image (Safari draws nothing otherwise)
+function drawRegion(ctx, src, sx, sy, sw, sh, dx, dy, dw, dh) {
+  const { W, H } = dim(src);
+  const x0 = clamp(sx, 0, W), y0 = clamp(sy, 0, H), x1 = clamp(sx + sw, 0, W), y1 = clamp(sy + sh, 0, H);
+  if (x1 - x0 < 1 || y1 - y0 < 1) return;
+  const kx = dw / sw, ky = dh / sh;
+  ctx.drawImage(src, x0, y0, x1 - x0, y1 - y0, dx + (x0 - sx) * kx, dy + (y0 - sy) * ky, (x1 - x0) * kx, (y1 - y0) * ky);
+}
+
+// A phone screenshot of an image viewer has the table floating on black: trim to it
+function trimToContent(src) {
+  const { W, H } = dim(src);
+  const k = Math.min(1, 240 / W), w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
+  const ctx = el('canvas', { width: w, height: h }).getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(src, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data;
+  const lit = (x, y) => { const i = (y * w + x) * 4; return d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114 > 40000 ? 1 : 0; };
+  const longestRun = (n, test) => {
+    let best = [0, n], len = 0, start = -1;
+    for (let i = 0; i <= n; i++) {
+      if (i < n && test(i)) { if (start < 0) start = i; continue; }
+      if (start >= 0 && i - start > len) { len = i - start; best = [start, i]; }
+      start = -1;
+    }
+    return best;
+  };
+  const [y0, y1] = longestRun(h, (y) => { let n = 0; for (let x = 0; x < w; x++) n += lit(x, y); return n > w * 0.5; });
+  const [x0, x1] = longestRun(w, (x) => { let n = 0; for (let y = y0; y < y1; y++) n += lit(x, y); return n > (y1 - y0) * 0.5; });
+  if ((x1 - x0) * (y1 - y0) > w * h * 0.9) return src;
+  const sx = Math.floor(x0 / k), sy = Math.floor(y0 / k);
+  const sw = Math.min(W - sx, Math.ceil((x1 - x0) / k)), sh = Math.min(H - sy, Math.ceil((y1 - y0) / k));
+  if (sw < 200 || sh < 60) return src;
+  const out = el('canvas', { width: sw, height: sh });
+  out.getContext('2d').drawImage(src, sx, sy, sw, sh, 0, 0, sw, sh);
+  return out;
+}
+
+function grayCanvas(src, scale) {
+  const { W, H } = dim(src);
+  const c = el('canvas', { width: Math.round(W * scale), height: Math.round(H * scale) });
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  const im = ctx.getImageData(0, 0, c.width, c.height), d = im.data;
+  for (let i = 0; i < d.length; i += 4) {
+    d[i] = d[i + 1] = d[i + 2] = (d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000;
+    d[i + 3] = 255;
+  }
+  ctx.putImageData(im, 0, 0);
+  return c;
+}
+
+// One table cell, cleaned for OCR: dark-on-white, contrast stretched, grid lines erased.
+function cleanCrop(src, x, y, w, h, S) {
+  const c = el('canvas', { width: Math.max(8, Math.round(w * S)), height: Math.max(8, Math.round(h * S)) });
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.imageSmoothingQuality = 'high';
+  drawRegion(ctx, src, x, y, w, h, 0, 0, c.width, c.height);
+  const Wc = c.width, Hc = c.height, n = Wc * Hc;
+  const im = ctx.getImageData(0, 0, Wc, Hc), d = im.data;
+  const g = new Uint8Array(n), hist = new Uint32Array(256);
+  for (let i = 0, p = 0; p < n; i += 4, p++) { g[p] = (d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000; hist[g[p]]++; }
+  let bg = 255, top = 0;
+  for (let v = 0; v < 256; v++) if (hist[v] > top) { top = hist[v]; bg = v; }
+  if (bg < 128) { for (let p = 0; p < n; p++) g[p] = 255 - g[p]; bg = 255 - bg; }
+  const lo = 40, hi = Math.max(lo + 30, bg - 14);
+  for (let p = 0; p < n; p++) g[p] = clamp((g[p] - lo) * 255 / (hi - lo), 0, 255);
+  // A grid line runs edge to edge; letter strokes (the ㅣ in 이) never do
+  for (let yy = 0; yy < Hc; yy++) {
+    let k = 0; for (let xx = 0; xx < Wc; xx++) if (g[yy * Wc + xx] < 200) k++;
+    if (k > Wc * 0.9) for (let xx = 0; xx < Wc; xx++) g[yy * Wc + xx] = 255;
+  }
+  for (let xx = 0; xx < Wc; xx++) {
+    let k = 0; for (let yy = 0; yy < Hc; yy++) if (g[yy * Wc + xx] < 200) k++;
+    if (k > Hc * 0.9) for (let yy = 0; yy < Hc; yy++) g[yy * Wc + xx] = 255;
+  }
+  for (let i = 0, p = 0; p < n; i += 4, p++) { d[i] = d[i + 1] = d[i + 2] = g[p]; d[i + 3] = 255; }
+  ctx.putImageData(im, 0, 0);
+  return c;
+}
+
+/* ---------- reading the table ---------- */
+function parseTime(text) {
+  if (text.length > 13) return null;
+  if ((text.match(/\d/g) || []).length !== 8) return null;
+  const m = text.match(/(\d{4})\D{0,3}(\d{4})/);
+  if (!m) return null;
+  const sh = +m[1].slice(0, 2), sm = +m[1].slice(2), eh = +m[2].slice(0, 2), em = +m[2].slice(2);
+  if (sh > 24 || eh > 24 || sm > 59 || em > 59) return null;
+  return { start: pad2(sh % 24) + ':' + pad2(sm), end: pad2(eh % 24) + ':' + pad2(em) };
+}
+function parseDate(text) {
+  const m = text.match(/(20\d{2})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{1,2})/);
+  if (!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+  return `${y}-${pad2(mo)}-${pad2(d)}`;
+}
+function addDays(iso, n) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + n));
+  return `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth() + 1)}-${pad2(dt.getUTCDate())}`;
+}
+
+// OCR words → one token per table cell, in original-image pixels
+function buildTokens(words, scale) {
+  let ws = words.map((w) => ({ t: w.text.replace(/\s+/g, ''), x0: w.bbox.x0, y0: w.bbox.y0, x1: w.bbox.x1, y1: w.bbox.y1 })).filter((w) => w.t);
+  const hMed = median(ws.map((w) => w.y1 - w.y0));
+  ws = ws.filter((w) => w.y1 - w.y0 < hMed * 2.5).map((w) => ({ ...w, cy: (w.y0 + w.y1) / 2, h: w.y1 - w.y0 }));
+  ws.sort((a, b) => a.cy - b.cy);
+  const lines = [];
+  for (const w of ws) {
+    let r = lines.find((r) => Math.abs(r.cy - w.cy) < Math.max(r.h, w.h) * 0.5);
+    if (!r) lines.push(r = { cy: w.cy, h: w.h, ws: [] });
+    r.ws.push(w);
+    r.cy += (w.cy - r.cy) / r.ws.length;
+    r.h = Math.max(r.h, w.h);
+  }
+  const tokens = [];
+  for (const r of lines) {
+    r.ws.sort((a, b) => a.x0 - b.x0);
+    let cur = null;
+    for (const w of r.ws) {
+      if (cur && w.x0 - cur.x1 < r.h * 0.8) {
+        cur.t += w.t; cur.x1 = Math.max(cur.x1, w.x1); cur.y0 = Math.min(cur.y0, w.y0); cur.y1 = Math.max(cur.y1, w.y1);
+      } else tokens.push(cur = { t: w.t, x0: w.x0, y0: w.y0, x1: w.x1, y1: w.y1 });
+    }
+  }
+  for (const k of tokens) {
+    k.x0 /= scale; k.x1 /= scale; k.y0 /= scale; k.y1 /= scale;
+    k.cx = (k.x0 + k.x1) / 2; k.cy = (k.y0 + k.y1) / 2; k.w = k.x1 - k.x0; k.h = k.y1 - k.y0;
+    k.time = parseTime(k.t);
+    k.date = k.time ? null : parseDate(k.t);
+  }
+  return tokens;
+}
+
+// Evenly spaced centres with holes: fill the holes, then look up to two steps past each end
+function fillSteps(known, step, lo, hi) {
+  if (!known.length || !(step > 0)) return known;
+  const out = [known[0]];
+  for (let i = 1; i < known.length; i++) {
+    const a = known[i - 1], b = known[i], n = clamp(Math.round((b - a) / step), 1, 4);
+    for (let k = 1; k < n; k++) out.push(a + (b - a) * k / n);
+    out.push(b);
+  }
+  const first = out[0], last = out[out.length - 1];
+  for (let k = 1; k <= 2 && first - step * k > lo; k++) out.unshift(first - step * k);
+  for (let k = 1; k <= 2 && last + step * k < hi; k++) out.push(last + step * k);
+  return out;
+}
+
+// OCR many small crops in one pass by stacking them as lines of one page
+async function ocrCrops(worker, crops) {
+  const out = crops.map(() => '');
+  const CHUNK = 80;
+  await worker.setParameters({ tessedit_pageseg_mode: '6' });
+  for (let off = 0; off < crops.length; off += CHUNK) {
+    const part = crops.slice(off, off + CHUNK);
+    const ch = Math.max(...part.map((c) => c.height));
+    const gap = Math.round(ch * 0.4), pad = Math.round(ch * 0.6), slot = ch + gap;
+    const C = el('canvas', { width: Math.max(...part.map((c) => c.width)) + pad * 2, height: part.length * slot + pad * 2 });
+    const ctx = C.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, C.width, C.height);
+    part.forEach((c, k) => ctx.drawImage(c, pad, pad + k * slot + Math.round((ch - c.height) / 2)));
+    phase = { base: 0.65 + 0.33 * (off / crops.length), span: 0.33 * (part.length / crops.length), label: '이름 확인하는 중…' };
+    const { data } = await worker.recognize(C);
+    for (const ln of data.lines) {
+      const k = Math.floor(((ln.bbox.y0 + ln.bbox.y1) / 2 - pad + gap / 2) / slot);
+      if (k >= 0 && k < part.length) out[off + k] += ln.text.replace(/\s+/g, '');
+    }
+  }
+  return out;
+}
+
+async function scanImage(image) {
+  const src = trimToContent(image);
+  const { W, H } = dim(src);
+  if (W < 200 || H < 60) throw new UserError('이미지가 너무 작아요. 스케줄표 원본 이미지를 넣어 주세요.');
+  const worker = await initOcr();
+
+  // Pass 1: whole table, sparse text. Tesseract reads this layout best when the
+  // table is about 2000px wide (much bigger and grid lines get read as letters),
+  // so aim for that and only try other scales if nothing usable comes back.
+  const cap = Math.sqrt(12e6 / (W * H));
+  const base = Math.min(clamp(2000 / W, 0.6, 3), cap);
+  const scales = [base, Math.min(base * 1.4, cap), base * 0.7];
+  let best = null;
+  for (let i = 0; i < scales.length; i++) {
+    if (i && Math.abs(scales[i] - base) < base * 0.1) continue;
+    phase = { base: 0.15 + 0.17 * i, span: i ? 0.17 : 0.5, label: i ? '다시 읽어 보는 중…' : '스케줄표 읽는 중…' };
+    await worker.setParameters({ tessedit_pageseg_mode: '11' });
+    const { data } = await worker.recognize(grayCanvas(src, scales[i]));
+    const tokens = buildTokens(data.words, scales[i]);
+    const times = tokens.filter((t) => t.time);
+    const merged = tokens.filter((t) => (t.t.match(/\d{4}\D{1,3}\d{4}/g) || []).length > 1).length;
+    const score = times.length - merged * 5;
+    if (!best || score > best.score) best = { tokens, times, score };
+    if (times.length && !merged) break;
+  }
+  const { tokens, times } = best;
+  if (!times.length) throw new UserError('근무 시간(예: 0700~1300)을 찾지 못했어요. 스케줄표가 잘리지 않은 선명한 이미지인지 확인해 주세요.');
+
+  // Table geometry from the time cells
+  const tH = median(times.map((t) => t.h));
+  const rows = [];
+  for (const t of [...times].sort((a, b) => a.cy - b.cy)) {
+    let r = rows.find((r) => Math.abs(r.cy - t.cy) < tH * 0.7);
+    if (!r) rows.push(r = { cy: t.cy, items: [] });
+    r.items.push(t); r.cy += (t.cy - r.cy) / r.items.length;
+  }
+  rows.forEach((r) => r.items.sort((a, b) => a.cx - b.cx));
+  const colGaps = rows.flatMap((r) => r.items.slice(1).map((t, i) => t.cx - r.items[i].cx));
+  // Lower quartile, not median: a skipped cell doubles a gap, it never halves one
+  const colW = colGaps.length ? quartile(colGaps) : median(times.map((t) => t.w)) * 1.45;
+  const texts = tokens.filter((t) => !t.time && !t.date && /[가-힣A-Za-z]/.test(t.t));
+  const above = (t, lo, hi) => {
+    let hit = null;
+    for (const n of texts) {
+      const dy = t.cy - n.cy;
+      if (dy > lo && dy < hi && Math.abs(n.cx - t.cx) < colW * 0.4 && (!hit || dy < t.cy - hit.cy)) hit = n;
+    }
+    return hit;
+  };
+  const dys = [];
+  for (const t of times) { const n = above(t, t.h * 0.8, t.h * 4); if (n) dys.push(t.cy - n.cy); }
+  const rowGaps = rows.slice(1).map((r, i) => r.cy - rows[i].cy);
+  const gapQ = rowGaps.length ? quartile(rowGaps) : 0;
+  const pitch = dys.length >= Math.max(1, times.length * 0.3) ? median(dys) : gapQ ? gapQ / 2 : tH * 2.1;
+  const rowGap = gapQ >= pitch * 1.5 ? gapQ : 0;   // a day is a name row plus a time row
+  const leftBound = Math.min(...times.map((t) => t.cx)) - colW / 2;
+  const hasDateCol = leftBound > colW * 0.5;
+
+  // Pass 1 has never misread a time in testing, but on blurry copies it skips
+  // cells. Lay a full grid over the table so pass 2 can read what was skipped.
+  const colSeen = [];
+  for (const t of [...times].sort((a, b) => a.cx - b.cx)) {
+    const c = colSeen[colSeen.length - 1];
+    if (c && t.cx - c.cx < colW * 0.5) { c.n++; c.cx += (t.cx - c.cx) / c.n; } else colSeen.push({ cx: t.cx, n: 1 });
+  }
+  const colXs = fillSteps(colSeen.map((c) => c.cx), colW, Infinity, W - colW * 0.25);
+  const grid = fillSteps(rows.map((r) => r.cy), rowGap, pitch * 1.6, H - pitch * 0.4).map((cy) => ({ cy, date: null, dateGuess: false }));
+  const entries = [];
+  grid.forEach((r, i) => colXs.forEach((x) => {
+    const t = times.find((t) => Math.abs(t.cx - x) < colW * 0.4 && Math.abs(t.cy - r.cy) < pitch * 0.5);
+    const at = t || { cx: x, cy: r.cy };
+    entries.push({ row: i, cx: at.cx, cy: at.cy, time: t ? t.time : null, filled: !t, pass1: above(at, pitch * 0.5, pitch * 1.5) });
+  }));
+
+  // Pass 2: read each name cell on its own, plus skipped time cells and each row's date cell
+  const S = clamp(60 / pitch, 1, 4);
+  const cell = (cx, cy) => cleanCrop(src, cx - colW * 0.46, cy - pitch * 0.39, colW * 0.92, pitch * 0.78, S);
+  const jobs = [];
+  for (const e of entries) {
+    jobs.push({ kind: 'name', e, crop: cell(e.cx, e.cy - pitch) });
+    if (!e.time) jobs.push({ kind: 'time', e, crop: cell(e.cx, e.cy) });
+  }
+  if (hasDateCol) for (const r of grid) jobs.push({ kind: 'date', r, crop: cleanCrop(src, 2, r.cy - pitch * 0.89, leftBound - 4, pitch * 0.78, S) });
+  const read = await ocrCrops(worker, jobs.map((j) => j.crop));
+  jobs.forEach((j, k) => {
+    if (j.kind === 'name') j.e.names = [read[k], j.e.pass1 ? j.e.pass1.t : ''].map(cleanName).filter(Boolean);
+    else if (j.kind === 'time') j.e.time = parseTime(read[k]);
+    else j.r.date = parseDate(read[k]);
+  });
+
+  // Dates: the row's own label first, then a label read in pass 1, then count from a neighbour
+  const leftDates = tokens.filter((t) => t.date && t.cx < leftBound);
+  for (const r of grid) {
+    if (r.date) continue;
+    const mid = r.cy - pitch / 2;
+    const near = leftDates.filter((t) => Math.abs(t.cy - mid) < pitch).sort((a, b) => Math.abs(a.cy - mid) - Math.abs(b.cy - mid))[0];
+    if (near) r.date = near.date;
+  }
+  const anchors = grid.map((r, i) => (r.date ? i : -1)).filter((i) => i >= 0);
+  const header = tokens.filter((t) => t.date && t.cx >= leftBound && t.cy < grid[0].cy - pitch).sort((a, b) => a.cy - b.cy)[0];
+  grid.forEach((r, i) => {
+    if (r.date) return;
+    if (anchors.length) {
+      const a = anchors.reduce((p, c) => (Math.abs(c - i) < Math.abs(p - i) ? c : p));
+      r.date = addDays(grid[a].date, i - a);
+    } else if (header) r.date = addDays(header.date, i);
+    r.dateGuess = !!r.date;
+  });
+
+  return { src, W, H, rows: grid, entries: entries.filter((e) => e.time), geom: { colW, pitch, leftBound, hasDateCol } };
+}
+
+/* ---------- finding my shifts ---------- */
+const cleanName = (s) => (s || '').replace(/[^가-힣A-Za-z]/g, '');
+function jamo(s) {
+  let out = '';
+  for (const ch of s) {
+    const c = ch.charCodeAt(0) - 0xac00;
+    if (c >= 0 && c < 11172) {
+      out += String.fromCharCode(0x1100 + Math.floor(c / 588), 0x1161 + Math.floor((c % 588) / 28));
+      if (c % 28) out += String.fromCharCode(0x11a7 + (c % 28));
+    } else out += ch.toLowerCase();
+  }
+  return out;
+}
+function lev(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function findShifts(scan, rawName) {
+  const target = cleanName(rawName);
+  if (!target) return [];
+  const tj = jamo(target), limit = Math.floor(tj.length / 4);
+  const seen = new Map();
+  for (const e of scan.entries) if (e.names[0]) seen.set(e.names[0], (seen.get(e.names[0]) || 0) + 1);
+  const out = [];
+  for (const e of scan.entries) {
+    let dist = Infinity;
+    for (const n of e.names) dist = Math.min(dist, n.includes(target) ? 0 : lev(jamo(n), tj));
+    if (dist > limit) continue;
+    // A loose match that reads cleanly as another name (seen twice, or both OCR
+    // passes agree) is a coworker with a similar name, not a misreading of mine.
+    if (dist >= 2 && (seen.get(e.names[0]) > 1 || e.names[0] === e.names[1])) continue;
+    const row = scan.rows[e.row];
+    out.push({
+      entry: e, date: row.date || '', start: e.time.start, end: e.time.end,
+      fuzzy: dist > 0, dateGuess: row.dateGuess, timeUnsure: e.filled, read: e.names[0] || '', checked: dist <= 1,
+    });
+  }
+  out.sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+  return out;
+}
+
+/* ---------- calendar file ---------- */
+const icsEsc = (s) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+function icsFold(line) {
+  const enc = new TextEncoder();
+  let out = '', cur = '', bytes = 0;
+  for (const ch of line) {
+    const n = enc.encode(ch).length;
+    if (bytes + n > 73) { out += cur + '\r\n '; cur = ''; bytes = 1; }
+    cur += ch; bytes += n;
+  }
+  return out + cur;
+}
+function buildIcs(shifts, title, alarmMin) {
+  const now = new Date();
+  const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const seq = Math.floor(now.getTime() / 60000);
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//shift-calendar//KO', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VTIMEZONE', 'TZID:Asia/Seoul', 'BEGIN:STANDARD', 'DTSTART:19700101T000000',
+    'TZOFFSETFROM:+0900', 'TZOFFSETTO:+0900', 'TZNAME:KST', 'END:STANDARD', 'END:VTIMEZONE'];
+  const perDay = {};
+  for (const s of shifts) {
+    const n = (perDay[s.date] = (perDay[s.date] || 0) + 1);
+    const endDate = s.end <= s.start ? addDays(s.date, 1) : s.date;
+    const dt = (d, t) => d.replace(/-/g, '') + 'T' + t.replace(':', '') + '00';
+    // Same day → same UID, so importing a corrected schedule updates instead of duplicating
+    L.push('BEGIN:VEVENT', `UID:shift-${s.date}-${n}@shift-calendar`, `DTSTAMP:${stamp}`, `SEQUENCE:${seq}`,
+      `DTSTART;TZID=Asia/Seoul:${dt(s.date, s.start)}`, `DTEND;TZID=Asia/Seoul:${dt(endDate, s.end)}`,
+      'SUMMARY:' + icsEsc(title));
+    if (alarmMin > 0) L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc(title), `TRIGGER:-PT${alarmMin}M`, 'END:VALARM');
+    L.push('END:VEVENT');
+  }
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n') + '\r\n';
+}
+function openIcs(text) {
+  // Safari hands a text/calendar blob to the Calendar "add events" sheet
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/calendar;charset=utf-8' }));
+  const a = el('a', { href: url, download: '근무일정.ics', rel: 'noopener', target: '_self' });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+const icsFile = (text) => new File([text], '근무일정.ics', { type: 'text/calendar' });
+function gcalUrl(s, title) {
+  const dt = (d, t) => d.replace(/-/g, '') + 'T' + t.replace(':', '') + '00';
+  const endDate = s.end <= s.start ? addDays(s.date, 1) : s.date;
+  const q = new URLSearchParams({ action: 'TEMPLATE', text: title, dates: dt(s.date, s.start) + '/' + dt(endDate, s.end), ctz: 'Asia/Seoul' });
+  return 'https://calendar.google.com/calendar/render?' + q;
+}
+
+/* ---------- result screen ---------- */
+const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+function prettyDate(iso) {
+  if (!iso) return '날짜 없음';
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${m}월 ${d}일 (${DOW[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]})`;
+}
+let scan = null, shifts = [], busy = false;
+const chosen = () => shifts.filter((s) => s.checked && s.date && s.start && s.end);
+const eventTitle = () => titleEl.value.trim() || '근무';
+
+function drawPreview() {
+  const c = $('#preview'), { src, W, H, geom } = scan;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  c.width = Math.min(W, Math.round(528 * dpr)); c.height = Math.round(c.width * H / W);
+  const ctx = c.getContext('2d'), k = c.width / W;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  ctx.lineWidth = Math.max(2, 3 * dpr * 0.75);
+  for (const s of shifts) {
+    ctx.strokeStyle = s.fuzzy ? '#e6a700' : '#e0245e';
+    ctx.strokeRect((s.entry.cx - geom.colW / 2) * k, (s.entry.cy - geom.pitch * 1.5) * k, geom.colW * k, geom.pitch * 2 * k);
+  }
+}
+function drawThumb(c, entry) {
+  const { src, geom } = scan;
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  const cellH = geom.pitch * 2, k = (56 * dpr) / cellH;
+  const dateW = geom.hasDateCol ? geom.leftBound : 0, gap = dateW ? Math.round(6 * dpr) : 0;
+  c.width = Math.round((dateW + geom.colW) * k) + gap; c.height = Math.round(cellH * k);
+  c.style.width = c.width / dpr + 'px';
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  const y = entry.cy - geom.pitch * 1.5;
+  if (dateW) drawRegion(ctx, src, 0, y, dateW, cellH, 0, 0, dateW * k, cellH * k);
+  drawRegion(ctx, src, entry.cx - geom.colW / 2, y, geom.colW, cellH, dateW * k + gap, 0, geom.colW * k, cellH * k);
+}
+
+function updateAddButton() {
+  const n = chosen().length, btn = $('#addBtn');
+  btn.textContent = n ? `캘린더에 추가 (${n}건)` : '추가할 근무를 선택하세요';
+  btn.disabled = !n;
+  $('#gcal').hidden = !n;
+  $('#gcalLinks').replaceChildren(...chosen().map((s) => el('a', {
+    className: 'btn', href: gcalUrl(s, eventTitle()), target: '_blank', rel: 'noopener',
+    textContent: `${prettyDate(s.date)} ${s.start} – ${s.end}`,
+  })));
+}
+function shiftItem(s) {
+  const flagged = s.fuzzy || s.dateGuess || s.timeUnsure || !s.date;
+  const li = el('li', { className: flagged ? 'flag' : '' });
+  const title = el('b'), sub = el('span');
+  const paint = () => {
+    title.textContent = prettyDate(s.date);
+    sub.textContent = `${s.start} – ${s.end}` + (s.end <= s.start ? ' (다음 날)' : '');
+  };
+  paint();
+  const check = el('input', { type: 'checkbox', checked: s.checked, ariaLabel: '이 근무 추가' });
+  check.addEventListener('change', () => { s.checked = check.checked; updateAddButton(); });
+  li.append(el('div', { className: 'row' }, check, el('div', { className: 'when' }, title, sub)));
+  if (s.fuzzy) li.append(el('span', { className: 'badge', textContent: `이름이 “${s.read}”(으)로 읽혔어요 · 아래 그림 확인` }));
+  if (s.timeUnsure) li.append(el('span', { className: 'badge', textContent: '시간이 흐리게 읽혔어요 · 아래 그림 확인' }));
+  if (!s.date) li.append(el('span', { className: 'badge', textContent: '날짜를 못 읽었어요 · 직접 입력' }));
+  else if (s.dateGuess) li.append(el('span', { className: 'badge', textContent: '날짜는 순서로 추정했어요' }));
+  const thumb = el('canvas', { className: 'thumb' });
+  thumb.setAttribute('aria-hidden', 'true');
+  drawThumb(thumb, s.entry);
+  li.append(thumb);
+
+  const field = (label, type, key, wide) => {
+    const input = el('input', { type, value: s[key] });
+    input.addEventListener('change', () => { s[key] = input.value; paint(); updateAddButton(); });
+    return el('label', { className: 'field' + (wide ? ' wide' : '') }, label, input);
+  };
+  const edit = el('details', { className: 'more', open: flagged },
+    el('summary', { textContent: '날짜 · 시간 수정' }),
+    el('div', { className: 'edit' }, field('날짜', 'date', 'date', true), field('시작', 'time', 'start'), field('종료', 'time', 'end')));
+  li.append(edit);
+  return li;
+}
+function knownNames() {
+  const count = new Map();
+  for (const e of scan.entries) if (e.names[0] && e.names[0].length >= 2) count.set(e.names[0], (count.get(e.names[0]) || 0) + 1);
+  return [...count.keys()].sort((a, b) => a.localeCompare(b, 'ko'));
+}
+function render() {
+  if (!scan) return;
+  const name = nameEl.value.trim();
+  shifts = findShifts(scan, name);
+  $('#result').hidden = false;
+  drawPreview();
+  const list = $('#shifts'); list.replaceChildren(...shifts.map(shiftItem));
+  const none = !shifts.length;
+  const sure = shifts.filter((s) => s.checked).length;
+  $('#resultTitle').textContent = !name ? '이름을 알려 주세요' : none ? `“${name}” 근무를 못 찾았어요`
+    : sure ? `“${name}” 근무 ${sure}건` : `“${name}” 대신 비슷한 이름만 찾았어요`;
+  const unsure = shifts.filter((s) => s.fuzzy || s.dateGuess || s.timeUnsure || !s.date).length;
+  const note = $('#resultNote');
+  note.hidden = !unsure;
+  note.textContent = unsure ? `확인이 필요한 항목이 ${unsure}건 있어요. 잘라 보여 드린 원본 그림과 비교해 주세요.` : '';
+  $('#namePicker').hidden = !!sure;
+  if (!sure) {
+    $('#chips').replaceChildren(...knownNames().map((n) => {
+      const b = el('button', { type: 'button', textContent: n });
+      b.addEventListener('click', () => { nameEl.value = n; saveName(); });
+      return b;
+    }));
+  }
+  for (const id of ['#addBtn', '#addHint']) $(id).hidden = none;
+  if (none) $('#gcal').hidden = true;
+  $('#shareBtn').hidden = none || !(navigator.canShare && navigator.canShare({ files: [icsFile('')] }));
+  updateAddButton();
+}
+
+async function handleImage(blob) {
+  if (busy) return;
+  busy = true; showError(''); $('#result').hidden = true;
+  setProgress(0.02, engineLoaded ? '이미지 여는 중…' : '글자 인식 엔진 불러오는 중…');
+  try {
+    scan = await scanImage(await loadBitmap(blob));
+    render();
+    $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    console.error(e);
+    scan = null;
+    showError(e instanceof UserError ? e.message : '읽는 중에 문제가 생겼어요. 잠시 뒤 다시 시도해 주세요.');
+  } finally {
+    busy = false; $('#progress').hidden = true;
+  }
+}
+
+/* ---------- wiring ---------- */
+function saveName() { store.set('name', nameEl.value.trim()); syncUrl(); render(); }
+nameEl.addEventListener('change', saveName);
+nameEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') nameEl.blur(); });
+titleEl.addEventListener('change', () => { store.set('title', titleEl.value.trim()); if (scan) updateAddButton(); });
+alarmEl.addEventListener('change', () => store.set('alarm', alarmEl.value));
+
+$('#pasteBtn').addEventListener('click', async () => {
+  try {
+    const items = await navigator.clipboard.read();
+    for (const it of items) {
+      const type = it.types.find((t) => t.startsWith('image/'));
+      if (type) return handleImage(await it.getType(type));
+    }
+    toast('복사된 이미지가 없어요. 스케줄표 이미지를 먼저 복사해 주세요.');
+  } catch {
+    toast('붙여넣기를 못 했어요. “사진에서 선택”을 써 주세요.');
+  }
+});
+$('#file').addEventListener('change', (e) => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (f) handleImage(f);
+});
+document.addEventListener('paste', (e) => {
+  const f = [...(e.clipboardData ? e.clipboardData.files : [])].find((f) => f.type.startsWith('image/'));
+  if (f) { e.preventDefault(); handleImage(f); }
+});
+document.addEventListener('dragover', (e) => e.preventDefault());
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const f = [...e.dataTransfer.files].find((f) => f.type.startsWith('image/'));
+  if (f) handleImage(f);
+});
+
+const currentIcs = () => buildIcs(chosen(), eventTitle(), +alarmEl.value);
+$('#addBtn').addEventListener('click', () => { if (chosen().length) openIcs(currentIcs()); });
+$('#shareBtn').addEventListener('click', async () => {
+  try { await navigator.share({ files: [icsFile(currentIcs())] }); } catch { /* cancelled */ }
+});
+$('#copyUrl').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(appUrl()); toast('주소를 복사했어요.'); }
+  catch { toast('복사하지 못했어요. 주소를 길게 눌러 복사해 주세요.'); }
+});
+
+$('#addHint').textContent = isIOS ? '캘린더 화면이 뜨면 “모두 추가”(또는 “캘린더에 추가”)를 누르면 끝이에요.'
+  : isAndroid ? '파일이 내려받아지면 “열기”를 눌러 캘린더 앱으로 가져오세요.'
+  : '내려받은 파일을 열면 캘린더에 일정이 들어가요.';
+
+// Links opened from a chat app land in its built-in browser, where calendar files don't work
+if (/KAKAOTALK|NAVER\(|Instagram|FBAN|FBAV|Line\//i.test(UA)) {
+  $('#inapp').hidden = false;
+  const here = location.href;
+  const out = /KAKAOTALK/i.test(UA) ? 'kakaotalk://web/openExternal?url=' + encodeURIComponent(here)
+    : isAndroid ? 'intent://' + here.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end' : '';
+  if (out) {
+    $('#openExternal').hidden = false;
+    $('#openExternal').addEventListener('click', () => { location.href = out; });
+  }
+}
+
+// An image shared to the installed app (Android share sheet) is parked by sw.js; pick it up
+const sharedToApp = new URLSearchParams(location.search).has('shared');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if (sharedToApp && 'caches' in window) {
+  (async () => {
+    try {
+      const cache = await caches.open('shiftcal-shared');
+      const res = await cache.match('shared-image');
+      if (!res) return;
+      await cache.delete('shared-image');
+      handleImage(await res.blob());
+    } catch { /* nothing was shared */ }
+  })();
+}
+
+if (hash.get('paste')) $('#pasteBtn').classList.add('pulse');
+syncUrl();
+// Warm the engine up so the first paste doesn't wait on the download
+window.addEventListener('load', () => setTimeout(() => initOcr().catch(() => {}), 300));
+
+// Hook for local testing
+window.shiftApp = { handleImage, buildIcs, state: () => ({ scan, shifts }) };
+})();
+</script>
+</body>
+</html>
