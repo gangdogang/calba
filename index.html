@@ -312,26 +312,35 @@ function drawRegion(ctx, src, sx, sy, sw, sh, dx, dy, dw, dh) {
   ctx.drawImage(src, x0, y0, x1 - x0, y1 - y0, dx + (x0 - sx) * kx, dy + (y0 - sy) * ky, (x1 - x0) * kx, (y1 - y0) * ky);
 }
 
-// A phone screenshot of an image viewer has the table floating on black: trim to it
+// A phone screenshot of an image viewer has the table floating on black: trim to it.
+// Only ever trims what is almost entirely black, so a table is never cut into.
 function trimToContent(src) {
   const { W, H } = dim(src);
   const k = Math.min(1, 240 / W), w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
   const ctx = el('canvas', { width: w, height: h }).getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(src, 0, 0, w, h);
   const d = ctx.getImageData(0, 0, w, h).data;
   const lit = (x, y) => { const i = (y * w + x) * 4; return d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114 > 40000 ? 1 : 0; };
+  // Longest stretch passing the test; dips of one or two lines (dark grid lines) don't break it
   const longestRun = (n, test) => {
-    let best = [0, n], len = 0, start = -1;
+    let best = [0, n], len = 0, start = -1, lastOk = -1;
     for (let i = 0; i <= n; i++) {
-      if (i < n && test(i)) { if (start < 0) start = i; continue; }
-      if (start >= 0 && i - start > len) { len = i - start; best = [start, i]; }
-      start = -1;
+      if (i < n && test(i)) { if (start < 0) start = i; lastOk = i; continue; }
+      if (start >= 0 && (i === n || i - lastOk > 2)) {
+        if (lastOk + 1 - start > len) { len = lastOk + 1 - start; best = [start, lastOk + 1]; }
+        start = -1;
+      }
     }
     return best;
   };
   const [y0, y1] = longestRun(h, (y) => { let n = 0; for (let x = 0; x < w; x++) n += lit(x, y); return n > w * 0.5; });
   const [x0, x1] = longestRun(w, (x) => { let n = 0; for (let y = y0; y < y1; y++) n += lit(x, y); return n > (y1 - y0) * 0.5; });
-  if ((x1 - x0) * (y1 - y0) > w * h * 0.9) return src;
+  const keep = (x1 - x0) * (y1 - y0);
+  if (keep > w * h * 0.9) return src;
+  let litOutside = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (y < y0 || y >= y1 || x < x0 || x >= x1) litOutside += lit(x, y);
+  if (litOutside > (w * h - keep) * 0.04) return src;
   const sx = Math.floor(x0 / k), sy = Math.floor(y0 / k);
   const sw = Math.min(W - sx, Math.ceil((x1 - x0) / k)), sh = Math.min(H - sy, Math.ceil((y1 - y0) / k));
   if (sw < 200 || sh < 60) return src;
@@ -784,9 +793,13 @@ function render() {
   $('#resultTitle').textContent = !name ? '이름을 알려 주세요' : none ? `“${name}” 근무를 못 찾았어요`
     : sure ? `“${name}” 근무 ${sure}건` : `“${name}” 대신 비슷한 이름만 찾았어요`;
   const unsure = shifts.filter((s) => s.fuzzy || s.dateGuess || s.timeUnsure || !s.date).length;
+  const notes = [];
+  // Rows under ~17px mean letters only a few pixels tall (a screenshot of a zoomed-out image)
+  if (scan.geom.pitch < 17) notes.push('이미지가 작아서 잘못 읽을 수 있어요. 화면 캡처 대신 원본 이미지를 넣으면 더 정확해요.');
+  if (unsure) notes.push(`확인이 필요한 항목이 ${unsure}건 있어요. 잘라 보여 드린 원본 그림과 비교해 주세요.`);
   const note = $('#resultNote');
-  note.hidden = !unsure;
-  note.textContent = unsure ? `확인이 필요한 항목이 ${unsure}건 있어요. 잘라 보여 드린 원본 그림과 비교해 주세요.` : '';
+  note.hidden = !notes.length;
+  note.textContent = notes.join(' ');
   $('#namePicker').hidden = !!sure;
   if (!sure) {
     $('#chips').replaceChildren(...knownNames().map((n) => {
