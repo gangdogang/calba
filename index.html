@@ -7,7 +7,8 @@
 <meta name="theme-color" content="#0a7d3e">
 <meta name="format-detection" content="telephone=no,date=no">
 <meta name="robots" content="noindex">
-<title>근무표 캘린더</title>
+<title>캘바 · 근무표 캘린더</title>
+<meta name="apple-mobile-web-app-title" content="캘바">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-180.png">
@@ -35,7 +36,8 @@ main {
   max-width: 560px; margin: 0 auto;
   padding: calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
 }
-header h1 { font-size: 24px; line-height: 1.25; margin: 0 0 4px; letter-spacing: -0.02em; }
+header h1 { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.02em; color: var(--brand); }
+header h1 span { font-size: 15px; font-weight: 600; letter-spacing: 0; color: var(--muted); margin-left: 4px; }
 header p { margin: 0 0 18px; color: var(--muted); font-size: 15px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
 .card h2 { font-size: 16px; margin: 0 0 10px; }
@@ -112,8 +114,8 @@ code.url { display: block; word-break: break-all; font: 13px/1.4 ui-monospace, M
 <body>
 <main>
   <header>
-    <h1>근무표 → 캘린더</h1>
-    <p>스케줄표 이미지에서 내 근무만 찾아 캘린더에 넣어요.</p>
+    <h1>캘바 <span>Calba</span></h1>
+    <p>근무표 사진에서 내 근무만 찾아 캘린더에 넣어요.</p>
   </header>
 
   <div id="inapp" class="notice warn" hidden>
@@ -188,7 +190,7 @@ code.url { display: block; word-break: break-all; font: 13px/1.4 ui-monospace, M
       <h3>갤럭시(안드로이드)</h3>
       <ol class="steps">
         <li>Chrome에서 이 페이지를 열고 메뉴(⋮) → “홈 화면에 추가” → “설치”.</li>
-        <li>매주: 카톡에서 스케줄표 이미지를 공유 → 앱 목록에서 “근무표”를 고르면 바로 읽어요.</li>
+        <li>매주: 카톡에서 스케줄표 이미지를 공유 → 앱 목록에서 “캘바”를 고르면 바로 읽어요.</li>
       </ol>
       <p class="hint">어느 폰이든 이미지를 저장해 두고 “사진에서 선택”으로 골라도 돼요.</p>
       <details class="more">
