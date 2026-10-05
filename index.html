@@ -119,7 +119,7 @@ code.url { display: block; word-break: break-all; font: 13px/1.4 ui-monospace, M
   </header>
 
   <div id="inapp" class="notice warn" hidden>
-    카카오톡 같은 앱 안에서 열면 캘린더 추가가 안 될 수 있어요. Safari나 Chrome으로 열어 주세요.
+    <span id="inappText">카카오톡 같은 앱 안에서 열면 캘린더 추가가 안 될 수 있어요. Safari나 Chrome으로 열어 주세요.</span>
     <button id="openExternal" class="link" type="button" hidden>기본 브라우저로 열기</button>
   </div>
 
@@ -882,6 +882,7 @@ $('#addHint').textContent = isIOS ? '캘린더 화면이 뜨면 “모두 추가
 // Links opened from a chat app land in its built-in browser, where calendar files don't work
 if (/KAKAOTALK|NAVER\(|Instagram|FBAN|FBAV|Line\//i.test(UA)) {
   $('#inapp').hidden = false;
+  if (isIOS) $('#inappText').textContent = '카카오톡 같은 앱 안에서 열면 캘린더 추가가 안 될 수 있어요. Safari로 열어 주세요.';
   const here = location.href;
   const out = /KAKAOTALK/i.test(UA) ? 'kakaotalk://web/openExternal?url=' + encodeURIComponent(here)
     : isAndroid ? 'intent://' + here.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end' : '';
@@ -889,6 +890,17 @@ if (/KAKAOTALK|NAVER\(|Instagram|FBAN|FBAV|Line\//i.test(UA)) {
     $('#openExternal').hidden = false;
     $('#openExternal').addEventListener('click', () => { location.href = out; });
   }
+} else if (isIOS && /CriOS|FxiOS|EdgiOS|OPiOS|Whale|DuckDuckGo/i.test(UA)) {
+  // On iPhone only Safari reliably hands a calendar file to the Calendar app
+  $('#inapp').hidden = false;
+  $('#inappText').textContent = '아이폰에서는 Safari로 열어야 캘린더 추가가 확실해요. 여기서 안 되면 주소를 복사해 Safari에 붙여 넣어 주세요. 구글 캘린더를 쓴다면 결과 아래의 구글 캘린더 버튼은 여기서도 돼요.';
+  $('#openExternal').textContent = '주소 복사';
+  $('#openExternal').hidden = false;
+  $('#openExternal').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(location.href); toast('주소를 복사했어요. Safari에 붙여 넣어 주세요.'); }
+    catch { toast('복사하지 못했어요. 주소창의 주소를 직접 복사해 주세요.'); }
+  });
+  $('#gcal').open = true;
 }
 
 // An image shared to the installed app (Android share sheet) is parked by sw.js; pick it up
