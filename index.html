@@ -1304,7 +1304,7 @@ function fillSteps(known, step, lo, hi) {
 }
 
 // OCR many small crops in one pass by stacking them as lines of one page
-async function ocrCrops(worker, crops) {
+async function ocrCrops(worker, crops, from = 0.65, span = 0.33) {
   const out = crops.map(() => '');
   const CHUNK = 80;
   await worker.setParameters({ tessedit_pageseg_mode: '6' });
@@ -1316,7 +1316,7 @@ async function ocrCrops(worker, crops) {
     const ctx = C.getContext('2d');
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, C.width, C.height);
     part.forEach((c, k) => ctx.drawImage(c, pad, pad + k * slot + Math.round((ch - c.height) / 2)));
-    phase = { base: 0.65 + 0.33 * (off / crops.length), span: 0.33 * (part.length / crops.length), label: '이름 확인하는 중…' };
+    phase = { base: from + span * (off / crops.length), span: span * (part.length / crops.length), label: '이름 확인하는 중…' };
     const { data } = await worker.recognize(C);
     for (const ln of data.lines) {
       const k = Math.floor(((ln.bbox.y0 + ln.bbox.y1) / 2 - pad + gap / 2) / slot);
@@ -1408,8 +1408,11 @@ async function scanImage(image) {
     jobs.push({ kind: 'name', e, crop: cell(e.cx, e.cy - pitch) });
     if (!e.time) jobs.push({ kind: 'time', e, crop: cell(e.cx, e.cy) });
   }
-  if (hasDateCol) for (const r of grid) jobs.push({ kind: 'date', r, crop: cleanCrop(src, 2, r.cy - pitch * 0.89, leftBound - 4, pitch * 0.78, S) });
-  const read = await ocrCrops(worker, jobs.map((j) => j.crop));
+  // A day's date label can sit beside its names, beside its times or between the two: take the whole cell
+  if (hasDateCol) for (const r of grid) jobs.push({ kind: 'date', r, crop: cleanCrop(src, 2, r.cy - pitch * 1.45, leftBound - 4, pitch * 1.9, S) });
+  // Date cells are twice as tall as the rest, so they are read as a page of their own (they come last in jobs)
+  const cells = jobs.filter((j) => j.kind !== 'date'), labels = jobs.filter((j) => j.kind === 'date');
+  const read = [...await ocrCrops(worker, cells.map((j) => j.crop), 0.65, 0.29), ...await ocrCrops(worker, labels.map((j) => j.crop), 0.94, 0.04)];
   jobs.forEach((j, k) => {
     if (j.kind === 'name') j.e.names = [read[k], j.e.pass1 ? j.e.pass1.t : ''].map(cleanName).filter(Boolean);
     else if (j.kind === 'time') j.e.time = parseTime(read[k]);
