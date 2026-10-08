@@ -563,6 +563,7 @@ button.mo-c:active .mo-b { transform: scale(.93); }
     </div>
     <button id="incomingAdd" class="slab" type="button">캘린더에 추가</button>
     <p class="hint">캘린더 화면이 뜨면 “모두 추가”(또는 “캘린더에 추가”)를 누르면 끝이에요.</p>
+    <button id="incomingClose" class="txt" type="button">넘겨받은 근무 닫기</button>
     <div class="sheet">
       <div id="incomingBoard" role="group" aria-label="주간 보드"></div>
       <ul id="incomingList" class="shifts ro"></ul>
@@ -1071,14 +1072,15 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('shiftcal.' + k); return v === null ? d : v; } catch { return d; } },
   set(k, v) { try { localStorage.setItem('shiftcal.' + k, v); } catch { /* private mode */ } },
 };
-// The name travels in the URL hash (never sent to the server) so a home-screen
-// icon or a Shortcut can carry it even when Safari has cleared site storage.
+// The name is remembered on this device. A link can carry one in its hash (never sent to the server), as the
+// Shortcut link and the Safari hand-over do; it fills the field only when nothing is remembered here yet, so
+// opening someone else's link does not replace your own name.
 const hash = new URLSearchParams(location.hash.slice(1));
 const nameEl = $('#name'), titleEl = $('#title'), alarmEl = $('#alarm');
-nameEl.value = (hash.get('name') || store.get('name', '')).trim();
+nameEl.value = (store.get('name', '') || hash.get('name') || '').trim();
 titleEl.value = store.get('title', '서브웨이 알바');
 alarmEl.value = store.get('alarm', '60');
-if (hash.get('name')) store.set('name', nameEl.value);
+if (nameEl.value) store.set('name', nameEl.value);
 
 function appUrl() {
   const p = new URLSearchParams();
@@ -1086,11 +1088,11 @@ function appUrl() {
   p.set('paste', '1');
   return location.origin + location.pathname + '#' + p.toString();
 }
+// The address bar stays bare, so a link copied from it carries no name and no shifts
+const bareUrl = () => { try { history.replaceState(null, '', location.pathname); } catch { /* file:// */ } };
 function syncUrl() {
   $('#shortcutUrl').textContent = appUrl();
-  const p = new URLSearchParams();
-  if (nameEl.value.trim()) p.set('name', nameEl.value.trim());
-  try { history.replaceState(null, '', location.pathname + (p.toString() ? '#' + p.toString() : '')); } catch { /* file:// */ }
+  bareUrl();
 }
 
 /* ---------- small UI helpers ---------- */
@@ -2244,6 +2246,30 @@ window.addEventListener('storage', (e) => {
 });
 if ('ResizeObserver' in window) new ResizeObserver(syncBar).observe($('#mbar'));
 /* ---------- end of the month view ---------- */
+
+/* ---------- starting clean ---------- */
+// A hand-over is for one use. Once its shifts have gone to the calendar, or it is closed, the address stops
+// carrying them, so this tab does not show last week's shifts when it is opened again.
+let handoverUsed = false;
+$('#incomingAdd').addEventListener('click', () => { if (!needsSafari) { handoverUsed = true; bareUrl(); } });
+$('#incomingClose').addEventListener('click', () => {
+  bareUrl();
+  $('#incoming').hidden = true; page.classList.remove('has-incoming');
+  setMode(page.dataset.mode);   // the paste buttons go back to where they sit without a hand-over
+  if (page.dataset.mode === 'home') $('#ghost').hidden = false;
+  syncBar(); window.scrollTo(0, 0);
+});
+// Opened again after a long while: start from the first screen. A result from last week is of no use, and the
+// name is remembered. A read in progress, or a short trip to KakaoTalk and back, is left alone.
+let awayAt = 0;
+const startClean = () => {
+  if (!awayAt || Date.now() - awayAt < 3600e3 || busy) return;
+  awayAt = 0;
+  if (scan || handoverUsed) location.replace(location.pathname);
+};
+document.addEventListener('visibilitychange', () => { if (document.hidden) awayAt = Date.now(); else startClean(); });
+window.addEventListener('pageshow', startClean);
+/* ---------- end of starting clean ---------- */
 
 // Hook for local testing
 window.shiftApp = { handleImage, buildIcs, handoffUrl, state: () => ({ scan, shifts }), showView, getLog: () => workLog.map((x) => ({ ...x })), setLog, monthReport, nightMinutes };
