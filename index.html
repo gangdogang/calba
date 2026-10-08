@@ -4,192 +4,513 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#0a7d3e">
+<meta name="theme-color" content="#008938" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#05411f" media="(prefers-color-scheme: dark)">
 <meta name="format-detection" content="telephone=no,date=no">
 <meta name="robots" content="noindex">
 <title>캘바 · 근무표 캘린더</title>
+<meta name="description" content="근무표 사진에서 내 근무만 찾아 캘린더에 넣어요.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="캘바">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="캘바 · 근무표 캘린더">
+<meta property="og:description" content="근무표 사진에서 내 근무만 찾아 캘린더에 넣어요.">
+<meta property="og:url" content="https://gangdogang.github.io/calba/">
+<meta property="og:image" content="https://gangdogang.github.io/calba/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="apple-mobile-web-app-title" content="캘바">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-180.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&amp;display=swap&amp;text=%200123456789.%25%3F%EC%BA%98%EB%B0%94%EA%B7%BC%EB%AC%B4%ED%91%9C%EC%82%AC%EC%A7%84%EC%97%90%EC%84%9C%EB%82%B4%EB%A7%8C%EC%B0%BE%EC%95%84%EB%A6%B0%EB%8D%94%EB%84%A3%EC%96%B4%EC%9A%94%EC%9D%B4%EB%B2%88%EC%A3%BC%EC%8A%A4%EC%BC%80%EC%A4%84%EB%A5%BC%EB%B6%99%EC%97%AC%EC%84%B8%EC%9B%94%ED%99%94%EC%88%98%EB%AA%A9%EA%B8%88%ED%86%A0%EC%9D%BC%EA%B1%B4%EC%8B%9C%EA%B0%84%EB%84%98%EA%B2%A8%EB%B0%9B%EC%9D%80" media="print" onload="this.media='all'">
 <style>
+/* 주간 보드: a Subway-green wall, white boards on it, ink for type, Subway yellow only for "press here" and "look here" */
 :root {
-  --bg: #f3f6f2; --card: #ffffff; --ink: #14201a; --muted: #5d6b63; --line: #e1e7e1;
-  --brand: #0a7d3e; --brand-ink: #ffffff; --soft: #e7f4ec;
-  --warn-bg: #fff5d1; --warn-ink: #7a5600; --err-bg: #fde8e6; --err-ink: #9b1c12;
+  --field: #008938; --field-hi: #008938; --field-2: #00752f; --field-3: #005a24;
+  --on-field: #fff; --on-field-2: #fff; --field-line: rgba(255, 255, 255, .32); --field-edge: rgba(255, 255, 255, .8);
+  --board: #fff; --board-2: #edf2ed; --board-line: #d5ddd5; --ghost: #b1c0b3; --board-hi: rgba(255, 255, 255, .7);
+  --ink: #12211a; --ink-2: #4a584f;
+  --accent: #ffc20d; --accent-ink: #201800; --flag-bg: #fff4cc;
+  --block: #008938; --on-block: #fff;
+  --slab-edge: #004a1d;
+  --chip: #fff; --chip-ink: #12211a;
+  --pop: #12211a; --on-pop: #fff;
+  --input: #fff; --focus: var(--on-field);
+  --display: "Black Han Sans", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --spring: cubic-bezier(.3, 1.5, .5, 1);
+  --bar-h: 0px;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1512; --card: #18201c; --ink: #eaf1ec; --muted: #9aa9a0; --line: #2a352f;
-    --brand: #2fbf6b; --brand-ink: #062313; --soft: #17301f;
-    --warn-bg: #3a2f0a; --warn-ink: #ffd866; --err-bg: #3d1512; --err-ink: #ffb4ab;
+    --field: #05411f; --field-hi: #064a24; --field-2: #033418; --field-3: #022411;
+    --on-field: #f2f6f2; --on-field-2: #a9b8ac; --field-line: rgba(242, 246, 242, .18); --field-edge: rgba(242, 246, 242, .5);
+    --board: #16261c; --board-2: #0d1a13; --board-line: #2b3f31; --ghost: #3c5544; --board-hi: rgba(255, 255, 255, .06);
+    --ink: #f2f6f2; --ink-2: #a6b3a8;
+    --flag-bg: #2f2c0d; --slab-edge: #000;
+    --chip: #f2f6f2; --chip-ink: #0b140e;
+    --pop: #f2f6f2; --on-pop: #0b140e;
+    --input: #0c1711;
   }
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; background: var(--field); }
 body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
-  -webkit-tap-highlight-color: transparent;
+  margin: 0; min-height: 100dvh; color: var(--on-field);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .3 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(560px 420px at 0 0, var(--field-hi), transparent 70%) no-repeat,
+    var(--field);
+  font: 500 16px/1.5 var(--body); word-break: keep-all; overflow-wrap: anywhere;
+  -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased;
 }
-main {
-  max-width: 560px; margin: 0 auto;
-  padding: calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
-}
-header h1 { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.02em; color: var(--brand); }
-header h1 span { font-size: 15px; font-weight: 600; letter-spacing: 0; color: var(--muted); margin-left: 4px; }
-header p { margin: 0 0 18px; color: var(--muted); font-size: 15px; }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
-.card h2 { font-size: 16px; margin: 0 0 10px; }
-label.field { display: block; font-size: 13px; color: var(--muted); font-weight: 600; }
-label.field + label.field { margin-top: 12px; }
-input[type=text], input[type=date], input[type=time], select {
-  display: block; width: 100%; margin-top: 6px; padding: 12px 14px; min-height: 48px;
-  font: inherit; color: var(--ink); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 12px; -webkit-appearance: none; appearance: none;
-}
-input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible, .btn:focus-within {
-  outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 2px;
-}
-details.more { margin-top: 12px; }
-details > summary { cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 600; list-style: none; }
-details > summary::-webkit-details-marker { display: none; }
-details > summary::before { content: "▸ "; }
-details[open] > summary::before { content: "▾ "; }
-details.more > div { margin-top: 12px; }
-.btn, button {
-  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 54px;
-  padding: 12px 16px; font: inherit; font-weight: 700; color: var(--ink); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 14px; cursor: pointer; text-align: center;
-}
-button.primary, .btn.primary { background: var(--brand); color: var(--brand-ink); border-color: transparent; }
-button:disabled { opacity: 0.45; cursor: default; }
-button.link { width: auto; min-height: 0; padding: 6px 2px; border: 0; background: none; color: var(--brand); font-weight: 600; }
-.pick { display: grid; gap: 10px; }
-.pick input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.pulse { animation: pulse 1.4s ease-in-out 4; }
-@keyframes pulse { 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--brand) 28%, transparent); } }
-@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
-.hint { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
-.notice { border-radius: 12px; padding: 10px 12px; font-size: 14px; margin: 0 0 12px; }
-.notice.warn { background: var(--warn-bg); color: var(--warn-ink); }
-.notice.err { background: var(--err-bg); color: var(--err-ink); }
-.notice.ok { background: var(--soft); color: var(--ink); }
-#progress .bar { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin-top: 10px; }
-#progress .bar i { display: block; height: 100%; width: 0; background: var(--brand); border-radius: 99px; transition: width .25s; }
-#progressLabel { font-weight: 600; }
-#preview { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); margin-bottom: 12px; }
-ul.shifts { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 10px; }
-ul.shifts li { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: var(--bg); }
-ul.shifts li.flag { border-color: color-mix(in srgb, var(--warn-ink) 45%, transparent); }
-.row { display: flex; align-items: center; gap: 12px; }
-.row input[type=checkbox] { width: 24px; height: 24px; flex: none; margin: 0; accent-color: var(--brand); }
-.when { flex: 1; min-width: 0; }
-.when b { display: block; font-size: 17px; letter-spacing: -0.01em; }
-.when span { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--warn-bg); color: var(--warn-ink); margin: 8px 6px 0 0; }
-canvas.thumb { display: block; max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; border: 1px solid var(--line); }
-.edit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.edit label.field + label.field { margin-top: 0; }
-.edit .wide { grid-column: 1 / -1; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.chips button { width: auto; min-height: 40px; padding: 6px 14px; border-radius: 99px; font-weight: 600; background: var(--card); }
-ol.steps { margin: 10px 0 0; padding-left: 20px; font-size: 14px; color: var(--ink); }
-ol.steps li { margin-bottom: 6px; }
-code.url { display: block; word-break: break-all; font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-top: 8px; }
-#toast {
-  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-  max-width: min(92vw, 520px); background: var(--ink); color: var(--bg); padding: 12px 16px; border-radius: 14px;
-  font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10; text-align: center;
-}
-#toast.show { opacity: 1; }
-.card h3 { font-size: 14px; margin: 14px 0 0; }
-.links { display: grid; gap: 8px; }
-.links a.btn { text-decoration: none; min-height: 48px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.notice button.link { display: block; margin-top: 4px; color: inherit; text-decoration: underline; }
-.foot { font-size: 13px; color: var(--muted); text-align: center; margin: 16px 0 0; }
 [hidden] { display: none !important; }
+h1, h2, h3, p, ul, ol { margin: 0; padding: 0; }
+button, input, select { font: inherit; color: inherit; }
+button, summary, label, select, a { touch-action: manipulation; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.ic { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.hint { font-size: 13px; line-height: 1.5; color: var(--on-field-2); text-wrap: pretty; }
+
+main {
+  position: relative; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;
+  padding: calc(12px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(calc(32px + env(safe-area-inset-bottom)), calc(var(--bar-h) + 22px)) max(12px, env(safe-area-inset-left));
+}
+/* body.aside: there is a result or a hand-over on screen, so reading another image moves down the page */
+body.aside .pick { order: 1; }
+body.aside .help { order: 2; }
+body.none #settings { order: 2; }
+/* iPhone, not Safari: once there is a result the add button and its hint carry this message */
+body.handoff[data-mode="result"] #inapp { order: 1; }
+
+/* ---- top: wordmark, headline, name ---- */
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand brand" "hl hl" "name name"; align-items: center; gap: 12px; padding: 0 2px; }
+.brand { grid-area: brand; display: flex; align-items: baseline; gap: 9px; min-height: 44px; }
+/* one-weight display face: no faux bold */
+.mark, .hl, .wk-d b, .fig, .sh-day b, #progressPct, .prog-days b, .steps li::before, .in-title { font-synthesis: none; }
+.mark { font: 900 31px/44px var(--display); letter-spacing: -.01em; }
+.mark-sub { font: 700 12.5px/1 var(--body); letter-spacing: .08em; color: var(--on-field-2); }
+.hl { grid-area: hl; font: 900 35px/1.16 var(--display); letter-spacing: -.012em; }
+.hl-back { display: none; font-size: 30px; }
+body.compact .top { grid-template-areas: "brand name" "hl hl"; }
+body.compact .hl-first { display: none; }
+body.compact .hl-back { display: block; }
+body.aside .hl, body[data-mode="busy"] .hl { display: none; }
+
+.namefield { grid-area: name; display: grid; gap: 7px; min-width: 0; }
+.nf-label { font: 800 15px/1.3 var(--body); }
+.nf-label small { margin-left: 6px; font-size: 13px; font-weight: 500; color: var(--on-field-2); }
+.nf-box { position: relative; display: block; justify-self: stretch; transition: transform .15s var(--spring); }
+#name {
+  display: block; width: 100%; height: 58px; padding: 0 16px; font: 800 21px/1 var(--body); letter-spacing: -.01em;
+  color: var(--on-field); background: var(--field-2);
+  border: 2px solid var(--field-edge); border-radius: 14px; -webkit-appearance: none; appearance: none;
+}
+#name::placeholder { color: var(--on-field-2); opacity: 1; font-weight: 500; }
+.nf-pen { display: none; position: absolute; right: 11px; top: 50%; width: 16px; height: 16px; margin-top: -8px; stroke-width: 2.6; color: var(--chip-ink); pointer-events: none; }
+body.compact .nf-label, .vh { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+body.compact .nf-box { justify-self: end; transform: rotate(-2deg); }
+body.compact .nf-box:focus-within { transform: none; }
+@media (hover: hover) { #name:hover { border-color: var(--on-field-2); } body.compact .nf-box:hover { transform: rotate(0) translateY(-1px); } }
+body.compact .nf-box:active { transform: scale(.97); }
+body.compact #name {
+  width: clamp(4.6em, calc(var(--nw, 3) * 1em + 2.9em), 10.5em); height: 44px; padding: 0 34px 0 13px; font-size: 17px;
+  color: var(--chip-ink); background: var(--chip); border-color: transparent; border-radius: 10px;
+  box-shadow: 0 3px 0 var(--field-3);
+}
+body.compact #name:placeholder-shown { width: 8.2em; color: var(--on-field); background: transparent; border: 2px dashed var(--on-field-2); box-shadow: none; }
+body.compact .nf-pen { display: block; }
+body.compact #name:placeholder-shown + .nf-pen { color: var(--on-field); }
+
+/* ---- notices: ink slabs with a yellow tab ---- */
+.notice { --focus: var(--on-pop); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px 16px 14px 14px; background: var(--pop); color: var(--on-pop); border-radius: 16px 16px 16px 4px; font-size: 14.5px; font-weight: 600; line-height: 1.5; text-wrap: balance; }
+/* needs-check badge; the empty alt text keeps screen readers from reading the mark out */
+.notice::before, .note::before, .sh-flag::before, .wk-blk.flag::after { content: "!"; content: "!" / ""; flex: none; display: grid; place-items: center; width: 1.45em; height: 1.45em; border-radius: .4em; background: var(--accent); color: var(--accent-ink); font: 900 13px/1 var(--body); }
+.notice::before { font-size: 16.5px; }
+.notice-b { display: grid; gap: 10px; justify-items: start; }
+.btn-fill { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 8px 16px; font-weight: 800; font-size: 15px; color: var(--pop); background: var(--on-pop); border: 0; border-radius: 12px; cursor: pointer; transition: transform .09s ease-out; }
+@media (hover: hover) { .btn-fill:hover, .slab:hover .face { transform: translateY(-1px); } }
+.btn-fill:active { transform: scale(.96); }
+
+/* ---- controls on the green: slab (primary), line (secondary), txt (tertiary) ---- */
+.slab { position: relative; display: block; width: 100%; padding: 0 0 5px; border: 0; background: none; border-radius: 18px; cursor: pointer; text-align: left; }
+.slab::before { content: ""; position: absolute; inset: 5px 0 0; border-radius: 18px; background: var(--slab-edge); }
+.face { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 58px; padding: 10px 18px; border-radius: 18px; background: var(--accent); color: var(--accent-ink); font: 800 17px/1.25 var(--body); box-shadow: inset 0 1px 0 var(--board-hi); transition: transform .09s ease-out; }
+.slab:active .face { transform: translateY(4px); }
+.slab:disabled { cursor: default; }
+.slab:disabled::before, body[data-mode="busy"] #pasteBtn::before { display: none; }
+.slab:disabled .face, body[data-mode="busy"] #pasteBtn .face { transform: none; background: none; color: var(--on-field-2); box-shadow: none; border: 2px dashed var(--field-line); }
+.slab:disabled .ic { display: none; }
+.btn-line { position: relative; display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 52px; padding: 8px 16px; font-weight: 700; font-size: 16px; color: var(--on-field); background: none; border: 2px solid var(--field-line); border-radius: 15px; cursor: pointer; transition: transform .09s ease-out; }
+.btn-line:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (hover: hover) { .btn-line:hover { border-color: var(--on-field-2); background: var(--field-2); } .txt:hover { text-decoration-thickness: 2.5px; } }
+.btn-line:active { transform: scale(.975); background: var(--field-2); }
+.btn-line.sm { width: auto; min-height: 46px; display: inline-flex; font-size: 14.5px; }
+.txt { display: flex; align-items: center; gap: 9px; min-height: 46px; padding: 6px 2px; font-weight: 700; font-size: 14.5px; text-align: left; color: var(--on-field); background: none; border: 0; cursor: pointer; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; transition: transform .09s ease-out; }
+.txt:active { transform: scale(.98); opacity: .8; }
+.txt .ic { width: 19px; height: 19px; }
+.txt + .txt { margin-top: -12px; }
+
+/* ---- pick: paste / choose a photo ---- */
+.pick { display: grid; gap: 10px; }
+.pick-h { display: none; font: 800 15px/1.3 var(--body); }
+.pick-row { display: grid; gap: 10px; }
+#pasteBtn .face { justify-content: flex-start; gap: 14px; min-height: 76px; padding: 12px 16px; }
+.tile { display: grid; place-items: center; flex: none; width: 46px; height: 46px; border-radius: 13px; background: var(--accent-ink); color: var(--accent); }
+.tile .ic { width: 25px; height: 25px; }
+.pb { display: grid; gap: 2px; min-width: 0; }
+.pb b { font-weight: 800; font-size: 18px; letter-spacing: -.015em; }
+.pb small { font-size: 12.5px; font-weight: 500; opacity: .72; }
+body.compact #pasteBtn .face { min-height: 92px; }
+body.compact .pb b { font-size: 20px; }
+.pulse::after { content: ""; position: absolute; inset: -5px -5px 0; border: 3px solid var(--on-field); border-radius: 24px; opacity: 0; pointer-events: none; animation: ring 1.4s ease-out 4; }
+@keyframes ring { 0% { opacity: .9; transform: scale(.97); } 100% { opacity: 0; transform: scale(1.02); } }
+#file { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.priv { display: flex; gap: 7px; align-items: flex-start; padding: 2px 2px 0; font-size: 12.5px; line-height: 1.45; color: var(--on-field-2); text-wrap: balance; }
+.priv .ic { width: 15px; height: 15px; margin-top: 1px; stroke-width: 2.4; }
+body[data-mode="busy"] .pick-row { opacity: .5; pointer-events: none; }
+body[data-mode="busy"] .tile { background: none; color: inherit; }
+body.aside .pick { padding-top: 18px; border-top: 1.5px solid var(--field-line); }
+body.aside .pick-h { display: block; }
+body.aside .pick-row { grid-template-columns: 1fr 1fr; }
+body.aside #pasteBtn { padding: 0; }
+body.aside #pasteBtn::before { display: none; }
+body.aside #pasteBtn .face { justify-content: center; gap: 9px; min-height: 52px; padding: 8px 12px; background: none; color: var(--on-field); border: 2px solid var(--field-line); border-radius: 15px; box-shadow: none; }
+body.aside #pasteBtn:active .face { transform: scale(.975); }
+body.aside .tile { width: auto; height: auto; background: none; color: inherit; }
+body.aside .tile .ic { width: 22px; height: 22px; }
+body.aside .pb b { font-size: 16px; font-weight: 700; letter-spacing: 0; }
+body.aside .pb small, body.aside .t-long { display: none; }
+
+/* ---- boards ---- */
+.sheet { --focus: var(--ink); position: relative; overflow: hidden; background: var(--board); color: var(--ink); border-radius: 24px 24px 24px 8px; box-shadow: 0 6px 0 var(--field-3), inset 0 1px 0 var(--board-hi); margin-bottom: 6px; }
+.wk { --g: 16px; padding: 13px 5px 10px 3px; }
+.wk-head, .wk-body { display: grid; grid-template-columns: var(--g) repeat(7, minmax(0, 1fr)); }
+.wk-d { display: grid; justify-items: center; gap: 3px; padding-bottom: 9px; color: var(--ink-2); }
+.wk-d b { font: 900 20px/1 var(--display); opacity: .7; }
+.wk-d i { min-width: 26px; padding: 1px 0; border-radius: 6px; font: 700 12.5px/1.3 var(--body); font-variant-numeric: tabular-nums; text-align: center; }
+.wk-d.on { color: var(--ink); }
+.wk-d.on b { opacity: 1; }
+.wk-d.today i { background: var(--accent); color: var(--accent-ink); font-weight: 800; }
+.wk-body { position: relative; isolation: isolate; }
+.wk-axis { position: relative; }
+.wk-axis span { position: absolute; right: 2px; transform: translateY(-50%); font: 700 10px/1 var(--body); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.wk-col { position: relative; }
+.wk-col::before { content: ""; position: absolute; inset: 0 2px; border-radius: 11px; background: var(--board-2); }
+.wk-line { position: absolute; left: calc(var(--g) + 4px); right: 4px; height: 1.5px; margin-top: -.75px; background: var(--board-line); opacity: .8; z-index: 1; }
+.wk-hit { position: absolute; left: 0; right: 0; z-index: 2; padding: 0; border: 0; background: none; cursor: pointer; }
+.wk-hit:focus-visible { outline-offset: -1px; }
+.wk-blk { position: absolute; left: 3px; right: 3px; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 6px 0 7px; overflow: hidden; border-radius: 10px; background: var(--block); color: var(--on-block); font: 800 11.5px/1 var(--body); font-variant-numeric: tabular-nums; letter-spacing: -.02em; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .22); transition: transform .1s ease-out; }
+.wk-blk b { font-weight: 800; }
+.wk-blk i { font-style: normal; font-weight: 600; }
+.wk-blk.off { background: none; color: var(--ink-2); box-shadow: inset 0 0 0 2px var(--block); }
+.wk-blk.flag { padding-top: 16px; }
+.wk-blk.flag::after { position: absolute; top: 2px; right: 2px; font-size: 9px; }
+.wk-blk.ghost { background: none; box-shadow: none; border: 2px dashed var(--ghost); }
+@media (hover: hover) { .wk-hit:hover .wk-blk { transform: translateY(-2px); } }
+.wk-hit:active .wk-blk { transform: scale(.93); }
+.wk.fresh .wk-blk { animation: drop .38s var(--spring) both; animation-delay: calc(var(--i) * 55ms + 60ms); }
+.wk-blk.pop { animation: pop .26s var(--spring); }
+@keyframes drop { from { opacity: 0; transform: translateY(-22px) scale(.9); } }
+@keyframes pop { from { transform: scale(.82); } }
+.wk-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px 12px; padding: 9px 7px 0 calc(var(--g) + 5px); font-size: 12.5px; font-weight: 600; line-height: 1.3; color: var(--ink-2); }
+.lg { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); font-weight: 700; }
+.lg i { width: 12px; height: 12px; border-radius: 3.5px; background: var(--block); }
+.lg-off i { background: none; box-shadow: inset 0 0 0 2px var(--block); }
+.wk-out { flex-basis: 100%; }
+.ghost-tag { position: absolute; left: 50%; top: 56%; z-index: 3; padding: 9px 15px; white-space: nowrap; border-radius: 11px; background: var(--pop); color: var(--on-pop); font: 800 14px/1.2 var(--body); transform: translate(-50%, -50%) rotate(-2.5deg); box-shadow: 0 4px 0 rgba(0, 0, 0, .18); }
+
+/* ---- result hero ---- */
+#result, #resultMore, #incoming { display: grid; gap: 14px; }
+/* the progress board takes no room once the result is up, or the scroll to the result lands too low */
+#result { scroll-margin-top: calc(12px + env(safe-area-inset-top)); }
+body[data-mode="result"] #progress { display: none; }
+.hero { display: grid; gap: 6px; padding: 0 2px; }
+.hero h2 { font: 700 16.5px/1.35 var(--body); text-wrap: balance; }
+.fig { display: flex; flex-wrap: wrap; align-items: baseline; font-family: var(--display); font-weight: 900; line-height: .95; }
+.fig b { font-size: 70px; font-weight: 900; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.fig span { margin: 0 14px 0 3px; font-size: 27px; }
+.fig-sub { font-size: 13.5px; font-weight: 600; color: var(--on-field-2); font-variant-numeric: tabular-nums; }
+#result.is-none .fig, #result.is-none .fig-sub { display: none; }
+#result.no-sure .hero h2 { font: 900 27px/1.22 var(--body); letter-spacing: -.02em; }
+#result.no-sure .fig b { font-size: 40px; }
+#result.no-sure .fig span { font-size: 19px; }
+.hero .note { margin-top: 6px; padding: 0; background: none; border: 0; color: var(--on-field); }
+.note { display: flex; gap: 9px; align-items: flex-start; padding: 10px 12px; font-size: 13.5px; font-weight: 600; line-height: 1.45; background: var(--flag-bg); border-top: 1.5px solid var(--board-line); text-wrap: pretty; }
+.note::before { margin-top: 1px; }
+.picker { display: grid; gap: 10px; padding: 0 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 9px; padding-bottom: 3px; }
+#chips button { min-width: 72px; min-height: 48px; padding: 8px 16px; font: 800 17px/1 var(--body); color: var(--chip-ink); background: var(--chip); border: 0; border-radius: 12px 12px 12px 4px; box-shadow: 0 3px 0 var(--slab-edge); cursor: pointer; transition: transform .09s ease-out; }
+@media (hover: hover) { #chips button:hover { transform: translateY(-1px); } }
+#chips button:active { transform: translateY(3px); }
+
+/* ---- shift list ---- */
+.shifts { list-style: none; }
+.sh { position: relative; border-top: 1.5px solid var(--board-line); }
+.sh.flag { background: var(--flag-bg); }
+.sh.flag::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--accent); }
+.sh-row { display: flex; align-items: stretch; min-height: 64px; }
+.tog { position: relative; flex: none; display: grid; place-items: center; width: 52px; cursor: pointer; }
+.tog input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.tog-box { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 8px; box-shadow: inset 0 0 0 2.5px var(--block); color: var(--on-block); transition: transform .12s var(--spring); }
+.tog-box .ic { width: 18px; height: 18px; stroke-width: 3.2; opacity: 0; }
+.tog input:checked + .tog-box { background: var(--block); }
+.tog input:checked + .tog-box .ic { opacity: 1; }
+.tog input:active + .tog-box { transform: scale(.84); }
+.tog input:focus-visible + .tog-box { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sh-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 0; background: none; border: 0; text-align: left; cursor: pointer; }
+.sh-main:focus-visible { outline-offset: -3px; }
+.sh-day { flex: none; display: grid; justify-items: center; gap: 2px; width: 34px; }
+.sh-day b { font: 900 22px/1 var(--display); }
+.sh-day i { font: 700 12px/1 var(--body); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.sh-when { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.sh-when > span { font-weight: 800; font-size: 19px; line-height: 1.2; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.sh-when i { font-style: normal; font-size: 13px; line-height: 1.3; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.sh-main > .ic { width: 20px; height: 20px; color: var(--ink-2); transition: transform .18s ease-out; }
+.sh.open .sh-main > .ic { transform: rotate(180deg); }
+.sh-main:active .sh-when { transform: translateX(2px); }
+@media (hover: hover) { .tog:hover .tog-box { transform: scale(1.08); } .sh-main:hover > .ic { color: var(--ink); transform: translateY(2px); } .sh.open .sh-main:hover > .ic { transform: rotate(180deg) translateY(2px); } }
+.sh.off .sh-day b, .sh.off .sh-when > span { opacity: .55; }
+.sh.off .sh-when > span { text-decoration: line-through; text-decoration-thickness: 2px; }
+.sh-flag { display: flex; gap: 8px; align-items: flex-start; margin: -4px 12px 10px 52px; font-size: 13px; font-weight: 700; line-height: 1.4; }
+.sh-flag::before { font-size: 12px; }
+.sh-more { display: grid; gap: 6px; padding: 0 12px 12px 52px; }
+.cap { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+canvas.thumb { display: block; max-width: 100%; height: auto; border-radius: 8px; border: 1.5px solid var(--ink); background: #fff; }
+.ed > summary { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding-right: 8px; font-size: 14px; font-weight: 700; cursor: pointer; list-style: none; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.ed > summary::-webkit-details-marker { display: none; }
+.ed > summary .ic { width: 17px; height: 17px; }
+.ed > summary:active { opacity: .7; }
+@media (hover: hover) { .ed > summary:hover { text-decoration-thickness: 2.5px; } .field input:hover, .field select:hover { border-color: var(--block); } .fold-body .field input:hover, .fold-body .field select:hover { border-color: var(--on-field-2); } }
+.ed[open] > summary { text-decoration: none; }
+.edit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 2px; }
+.edit .wide { grid-column: 1 / -1; }
+.field { position: relative; display: grid; gap: 5px; min-width: 0; font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+.field input, .field select { display: block; width: 100%; min-width: 0; min-height: 48px; padding: 10px 12px; font: 600 16px/1.3 var(--body); color: var(--ink); background: var(--input); border: 2px solid var(--ink); border-radius: 12px; -webkit-appearance: none; appearance: none; }
+.sh.flash::after { content: ""; position: absolute; inset: 3px; border-radius: 12px; box-shadow: inset 0 0 0 3px var(--ink); pointer-events: none; opacity: 0; animation: flash 1.2s ease-out; }
+@keyframes flash { 12%, 65% { opacity: 1; } }
+.ro .sh-row { min-height: 58px; padding-left: 14px; align-items: center; gap: 12px; }
+
+/* ---- progress: the week fills up ---- */
+.prog { padding: 16px 14px 14px; display: grid; gap: 10px; }
+.prog-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+#progressLabel { font-weight: 800; font-size: 17px; line-height: 1.3; }
+#progressPct { font: 900 34px/.9 var(--display); font-variant-numeric: tabular-nums; }
+.prog-bar { position: relative; height: 20px; border-radius: 7px; background: var(--board-2); overflow: hidden; }
+.prog-bar::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(100% / 7 - 3px), var(--board) calc(100% / 7 - 3px), var(--board) calc(100% / 7)); }
+#progressBar { position: absolute; inset: 0; width: 100% !important; background: var(--block); transform: scaleX(var(--p, 0)); transform-origin: 0 50%; transition: transform .25s ease-out; }
+.prog-days, .prog-skel { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+.prog-days b { font: 900 17px/1 var(--display); }
+.prog-skel { height: 84px; gap: 4px; }
+.prog-skel i { position: relative; border-radius: 10px; background: var(--board-2); }
+.prog-skel i::after { content: ""; position: absolute; left: 3px; right: 3px; top: var(--t, 10%); height: var(--h, 40%); border-radius: 8px; background: var(--block); opacity: .16; animation: skel 1s ease-in-out infinite alternate; animation-delay: var(--d, 0s); }
+.prog-skel i:nth-child(2) { --t: 48%; --h: 38%; --d: .12s; }
+.prog-skel i:nth-child(3) { --t: 26%; --h: 34%; --d: .24s; }
+.prog-skel i:nth-child(4) { --t: 56%; --h: 32%; --d: .36s; }
+.prog-skel i:nth-child(5) { --t: 14%; --h: 46%; --d: .48s; }
+.prog-skel i:nth-child(6) { --t: 40%; --h: 44%; --d: .6s; }
+.prog-skel i:nth-child(7) { --t: 20%; --h: 30%; --d: .72s; }
+@keyframes skel { to { opacity: .6; } }
+.prog .hint { color: var(--ink-2); }
+
+/* ---- folds (settings, help, google calendar) ---- */
+.fold { margin-bottom: -16px; border-top: 1.5px solid var(--field-line); }
+.fold[open], .fold.sub { margin-bottom: 0; }
+.fold > summary { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 2px; font-weight: 700; font-size: 15.5px; cursor: pointer; list-style: none; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary > .ic { margin-left: auto; width: 20px; height: 20px; color: var(--on-field-2); transition: transform .18s ease-out; }
+.fold[open] > summary > .ic { transform: rotate(180deg); }
+.fold > summary:active { opacity: .7; }
+.fold > summary > span:first-child { flex: none; }
+.fold-val { display: flex; gap: .3em; min-width: 0; margin-left: auto; white-space: nowrap; font-size: 13.5px; font-weight: 600; color: var(--on-field-2); }
+.fold-val span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.fold-val + .ic { margin-left: 0 !important; }
+.fold-body { display: grid; gap: 12px; padding: 2px 2px 20px; font-size: 14.5px; }
+.fold-body h3 { margin-top: 4px; font-size: 15px; font-weight: 800; }
+.fold-body .field { color: var(--on-field-2); }
+.fold-body .field input, .fold-body .field select { color: var(--on-field); background-color: var(--field-2); border-color: var(--field-edge); }
+.fold-body .field input::placeholder { color: var(--on-field-2); opacity: .85; }
+.field select { padding-right: 40px; }
+.field > .ic { position: absolute; right: 12px; bottom: 14px; width: 20px; height: 20px; color: var(--on-field-2); pointer-events: none; }
+.steps { list-style: none; counter-reset: s; display: grid; gap: 9px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; line-height: 1.5; text-wrap: pretty; }
+.steps li::before { content: counter(s); width: 24px; height: 24px; border-radius: 7px; background: var(--on-field); color: var(--field); font: 900 14px/24px var(--display); text-align: center; }
+.fold.sub { margin-top: 4px; }
+.fold.sub > summary { font-size: 14.5px; }
+code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; background: var(--field-2); border: 1.5px dashed var(--field-line); border-radius: 12px 12px 12px 4px; }
+#resultMore { padding-top: 18px; border-top: 1.5px solid var(--field-line); }
+.orig { display: grid; gap: 6px; }
+.orig h3 { font-size: 15px; font-weight: 800; }
+#preview { display: block; width: 100%; height: auto; margin-top: 4px; border-radius: 12px 12px 12px 4px; background: #fff; box-shadow: 0 5px 0 var(--field-3); }
+.links { display: grid; gap: 8px; }
+#gcalLinks a { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 50px; padding: 8px 14px; font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--on-field); text-decoration: none; background: var(--field-2); border: 2px solid var(--field-line); border-radius: 13px; transition: transform .09s ease-out; }
+#gcalLinks a:active { transform: scale(.98); }
+@media (hover: hover) { #gcalLinks a:hover { border-color: var(--on-field-2); } .fold > summary:hover > .ic { color: var(--on-field); } }
+#gcalLinks .ic { width: 18px; height: 18px; color: var(--on-field-2); }
+
+/* ---- hand-over ---- */
+.hero .in-title { font: 900 33px/1.15 var(--display); letter-spacing: -.01em; }
+
+/* ---- bottom action bar and toast ---- */
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: 11px max(12px, env(safe-area-inset-right)) calc(11px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); background: var(--field-2); box-shadow: 0 -1.5px 0 var(--field-line), 0 -10px 18px -12px rgba(2, 20, 11, .3); animation: rise .3s cubic-bezier(.2, .9, .3, 1) both; }
+@keyframes rise { from { transform: translateY(100%); } }
+.bar-in { max-width: 536px; margin: 0 auto; display: grid; gap: 7px; }
+.bar .face { min-height: 56px; font-size: 17.5px; }
+.bar-hint { font-size: 12.5px; line-height: 1.4; color: var(--on-field-2); text-wrap: pretty; }
+#toast { position: fixed; left: 50%; bottom: max(calc(18px + env(safe-area-inset-bottom)), calc(var(--bar-h) + 12px)); z-index: 30; width: max-content; max-width: min(92vw, 520px); padding: 12px 16px; border-radius: 14px 14px 14px 4px; background: var(--pop); color: var(--on-pop); font-size: 14px; font-weight: 700; line-height: 1.4; text-align: center; box-shadow: 0 0 0 1.5px var(--field-line), 0 10px 24px -8px rgba(0, 0, 0, .5); opacity: 0; transform: translate(-50%, 14px) scale(.96); transition: opacity .18s ease-out, transform .28s var(--spring); pointer-events: none; }
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 374px) {
+  .hl { font-size: 32px; }
+  .hl-back { font-size: 28px; }
+  .fig b { font-size: 62px; }
+  .pb b { font-size: 17px; }
+  body.compact .pb b { font-size: 18.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .sh.flash::after { opacity: 1; }
+}
 </style>
 </head>
-<body>
+<body data-mode="home">
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-paste" viewBox="0 0 24 24"><path d="M9 5.5H7.5a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7.5a2 2 0 0 0-2-2H15"/><rect x="9" y="3.5" width="6" height="4" rx="1.2"/><path d="M9 12h6M9 16h3.5"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.5"/><path d="m5 17.5 4.5-4.5 3.5 3 2.5-2 3.5 3.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4.5 19.5h4L19 9l-4-4L4.5 15.5v4z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.5 12.5 4.5 4.5 8.5-9.5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M8 3.5v4M16 3.5v4M12 11.5v5M9.5 14h5"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M13.5 5H19v5.5M19 5l-8 8M10 6.5H7a2 2 0 0 0-2 2V17a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11.5" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 7.5l4-4 4 4M6 12v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+</svg>
 <main>
-  <header>
-    <h1>캘바 <span>Calba</span></h1>
-    <p>근무표 사진에서 내 근무만 찾아 캘린더에 넣어요.</p>
-  </header>
-
-  <div id="inapp" class="notice warn" hidden>
-    <span id="inappText">카카오톡 같은 앱 안에서 열면 캘린더 추가가 안 될 수 있어요. Safari나 Chrome으로 열어 주세요.</span>
-    <button id="openExternal" class="link" type="button" hidden>기본 브라우저로 열기</button>
+  <div id="inapp" class="notice" hidden>
+    <div class="notice-b">
+      <span id="inappText">카카오톡 같은 앱 안에서 열면 캘린더 추가가 안 될 수 있어요. Safari나 Chrome으로 열어 주세요.</span>
+      <button id="openExternal" class="btn-fill" type="button" hidden>기본 브라우저로 열기</button>
+    </div>
   </div>
 
-  <section class="card">
-    <label class="field">내 이름 (스케줄표에 적힌 그대로)
-      <input id="name" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="예: 홍길동" enterkeyhint="done">
+  <header class="top">
+    <div class="brand"><h1 class="mark">캘바</h1><span class="mark-sub">CALBA</span></div>
+    <p class="hl hl-first">근무표 사진에서<br>내 근무만 찾아<br>캘린더에 넣어요.</p>
+    <p class="hl hl-back">이번 주 스케줄표를<br>붙여넣어 주세요.</p>
+    <label class="namefield">
+      <span class="nf-label">내 이름<small>스케줄표에 적힌 그대로</small></span>
+      <span class="nf-box">
+        <input id="name" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="예: 홍길동" enterkeyhint="done">
+        <svg class="ic nf-pen" aria-hidden="true"><use href="#i-pen"/></svg>
+      </span>
     </label>
-    <details class="more">
-      <summary>일정 제목 · 알림 설정</summary>
-      <div>
-        <label class="field">캘린더에 표시할 제목
-          <input id="title" type="text" autocomplete="off" placeholder="서브웨이 알바">
-        </label>
-        <label class="field">알림
-          <select id="alarm">
-            <option value="0">없음</option>
-            <option value="30">30분 전</option>
-            <option value="60">1시간 전</option>
-            <option value="120">2시간 전</option>
-          </select>
-        </label>
-      </div>
-    </details>
-  </section>
+  </header>
 
-  <section id="incoming" class="card" hidden>
-    <h2 id="incomingTitle"></h2>
-    <ul id="incomingList" class="shifts"></ul>
-    <button id="incomingAdd" class="primary" type="button">캘린더에 추가</button>
+  <section id="incoming" hidden>
+    <div class="hero">
+      <h2 id="incomingTitle" class="in-title"></h2>
+      <p id="incomingSub" class="fig-sub"></p>
+    </div>
+    <button id="incomingAdd" class="slab" type="button">캘린더에 추가</button>
     <p class="hint">캘린더 화면이 뜨면 “모두 추가”(또는 “캘린더에 추가”)를 누르면 끝이에요.</p>
+    <div class="sheet">
+      <div id="incomingBoard" role="group" aria-label="주간 보드"></div>
+      <ul id="incomingList" class="shifts ro"></ul>
+    </div>
   </section>
 
-  <section class="card pick">
-    <button id="pasteBtn" class="primary" type="button">복사한 스케줄표 붙여넣기</button>
-    <label class="btn" for="file">사진에서 선택<input id="file" type="file" accept="image/*"></label>
+  <section class="pick" aria-label="스케줄표 넣기">
+    <h2 class="pick-h">다른 스케줄표 읽기</h2>
+    <div class="pick-row">
+      <button id="pasteBtn" class="slab" type="button"><span class="face">
+        <span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-paste"/></svg></span>
+        <span class="pb"><b><span class="t-long">복사한 스케줄표 </span>붙여넣기</b><small>카톡에서 스케줄표 이미지를 복사한 뒤 눌러요</small></span>
+      </span></button>
+      <label class="btn-line" for="file"><svg class="ic" aria-hidden="true"><use href="#i-photo"/></svg>사진에서 선택<input id="file" type="file" accept="image/*"></label>
+    </div>
+    <p class="priv"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg>스케줄표 이미지는 이 기기 안에서만 읽고, 어디에도 전송하지 않아요.</p>
   </section>
 
-  <section id="progress" class="card" hidden aria-live="polite">
-    <div id="progressLabel">준비 중…</div>
-    <div class="bar"><i id="progressBar"></i></div>
+  <section id="progress" class="sheet prog" hidden>
+    <div class="prog-top">
+      <div id="progressLabel" aria-live="polite">준비 중…</div>
+      <div id="progressPct" aria-hidden="true">0%</div>
+    </div>
+    <div class="prog-bar"><i id="progressBar"></i></div>
+    <div class="prog-days" aria-hidden="true"><b>월</b><b>화</b><b>수</b><b>목</b><b>금</b><b>토</b><b>일</b></div>
+    <div class="prog-skel" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <p class="hint">처음 한 번은 글자 인식 엔진을 내려받느라 조금 더 걸려요.</p>
   </section>
 
-  <p id="error" class="notice err" hidden role="alert"></p>
+  <p id="error" class="notice" hidden role="alert"></p>
 
-  <section id="result" class="card" hidden>
-    <h2 id="resultTitle"></h2>
-    <canvas id="preview" aria-hidden="true"></canvas>
-    <p id="resultNote" class="notice warn" hidden></p>
-    <ul id="shifts" class="shifts"></ul>
-    <div id="namePicker" hidden>
-      <p class="hint" style="margin-top:0">표에서 읽은 이름이에요. 본인 이름을 누르면 바로 찾아요.</p>
+  <section id="ghost" class="sheet" aria-label="주간 보드 미리 보기">
+    <div id="ghostBoard" aria-hidden="true"></div>
+    <p class="ghost-tag">여기에 이번 주 근무가 채워져요</p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="hero">
+      <h2 id="resultTitle"></h2>
+      <p class="fig" aria-live="polite"><b id="figN">0</b><span>건</span><b id="figH">0</b><span>시간</span></p>
+      <p id="figSub" class="fig-sub"></p>
+    </div>
+    <div id="namePicker" class="picker" hidden>
+      <p class="hint">표에서 읽은 이름이에요. 본인 이름을 누르면 바로 찾아요.</p>
       <div id="chips" class="chips"></div>
     </div>
-    <button id="addBtn" class="primary" type="button" hidden>캘린더에 추가</button>
-    <p id="addHint" class="hint" hidden></p>
-    <button id="copyHandoff" class="link" type="button" hidden>Safari가 안 열리면: 링크 복사</button>
-    <button id="shareBtn" class="link" type="button" hidden>캘린더 화면이 안 뜨면: 파일로 내보내기</button>
-    <details id="gcal" class="more" hidden>
-      <summary>구글 캘린더 앱을 쓴다면</summary>
-      <div>
-        <p class="hint" style="margin-top:0">근무를 하나씩 눌러 저장하세요.</p>
+    <div id="sheet" class="sheet">
+      <div id="board" role="group" aria-label="주간 보드"></div>
+      <p id="resultNote" class="note" hidden></p>
+      <ul id="shifts" class="shifts"></ul>
+    </div>
+  </section>
+
+  <details id="settings" class="fold">
+    <summary><span>일정 제목 · 알림 설정</span><span id="setVal" class="fold-val"></span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+    <div class="fold-body">
+      <label class="field">캘린더에 표시할 제목
+        <input id="title" type="text" autocomplete="off" placeholder="서브웨이 알바">
+      </label>
+      <label class="field">알림
+        <select id="alarm">
+          <option value="0">없음</option>
+          <option value="30">30분 전</option>
+          <option value="60">1시간 전</option>
+          <option value="120">2시간 전</option>
+        </select>
+        <svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg>
+      </label>
+    </div>
+  </details>
+
+  <section id="resultMore" hidden>
+    <div class="orig">
+      <h3>원본 스케줄표</h3>
+      <p id="origHint" class="hint"></p>
+      <canvas id="preview" aria-hidden="true"></canvas>
+    </div>
+    <button id="copyHandoff" class="txt" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg>Safari가 안 열리면: 링크 복사</button>
+    <button id="shareBtn" class="txt" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg>캘린더 화면이 안 뜨면: 파일로 내보내기</button>
+    <details id="gcal" class="fold" hidden>
+      <summary>구글 캘린더 앱을 쓴다면<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="fold-body">
+        <p class="hint">근무를 하나씩 눌러 저장하세요.</p>
         <div id="gcalLinks" class="links"></div>
       </div>
     </details>
   </section>
 
-  <section class="card">
-    <details>
-      <summary>앱처럼 쓰는 방법 (아이폰 · 갤럭시)</summary>
+  <details class="fold help">
+    <summary>앱처럼 쓰는 방법 (아이폰 · 갤럭시)<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+    <div class="fold-body">
       <h3>아이폰</h3>
       <ol class="steps">
         <li>Safari에서 이 페이지를 열고 공유 버튼 → “홈 화면에 추가”.</li>
@@ -201,18 +522,24 @@ code.url { display: block; word-break: break-all; font: 13px/1.4 ui-monospace, M
         <li>매주: 카톡에서 스케줄표 이미지를 공유 → 앱 목록에서 “캘바”를 고르면 바로 읽어요.</li>
       </ol>
       <p class="hint">어느 폰이든 이미지를 저장해 두고 “사진에서 선택”으로 골라도 돼요.</p>
-      <details class="more">
-        <summary>아이폰 공유 버튼에서 바로 열기 (단축어)</summary>
-        <div>
-          <p class="hint" style="margin-top:0">단축어 앱에서 새 단축어를 만들고 “클립보드에 복사”, “URL 열기” 동작을 차례로 넣은 뒤, 세부사항에서 “공유 시트에서 보기”를 켜고 받는 종류를 “이미지”로 두세요. URL에는 아래 주소를 넣어요.</p>
+      <details class="fold sub">
+        <summary>아이폰 공유 버튼에서 바로 열기 (단축어)<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="fold-body">
+          <p class="hint">단축어 앱에서 새 단축어를 만들고 “클립보드에 복사”, “URL 열기” 동작을 차례로 넣은 뒤, 세부사항에서 “공유 시트에서 보기”를 켜고 받는 종류를 “이미지”로 두세요. URL에는 아래 주소를 넣어요.</p>
           <code id="shortcutUrl" class="url"></code>
-          <button id="copyUrl" class="link" type="button">주소 복사</button>
+          <div><button id="copyUrl" class="btn-line sm" type="button"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg>주소 복사</button></div>
         </div>
       </details>
-    </details>
-  </section>
-  <p class="foot">스케줄표 이미지는 이 기기 안에서만 읽고, 어디에도 전송하지 않아요.</p>
+    </div>
+  </details>
 </main>
+
+<div id="bar" class="bar" hidden>
+  <div class="bar-in">
+    <button id="addBtn" class="slab" type="button" hidden>캘린더에 추가</button>
+    <p id="addHint" class="bar-hint" hidden></p>
+  </div>
+</div>
 <div id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
@@ -236,6 +563,279 @@ class UserError extends Error {}
 const UA = navigator.userAgent;
 const isAndroid = /Android/i.test(UA);
 const isIOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+/* ---------- presentation: 주간 보드 ----------
+   Everything after this block (settings, reader, matcher, calendar file, wiring) is the
+   original code, untouched. This block wraps the functions that paint the screen: each
+   original still runs and owns the data; the wrapper lays its output out as the week
+   board, the totals and the compact list. */
+const page = document.body;
+const icon = (name) => {
+  const NS = 'http://www.w3.org/2000/svg', s = document.createElementNS(NS, 'svg'), u = document.createElementNS(NS, 'use');
+  s.setAttribute('class', 'ic'); s.setAttribute('aria-hidden', 'true'); u.setAttribute('href', '#i-' + name);
+  s.append(u);
+  return s;
+};
+const face = (name, text) => el('span', { className: 'face' }, icon(name), el('span', { textContent: text }));
+// Scrolls do not glide under reduced motion
+const glide = (node, block) => node.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block });
+
+// Small pure helpers for the board and the totals
+const dowOf = (iso) => { const [y, m, d] = iso.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); };
+const monthDay = (iso) => iso.split('-').slice(1).map(Number);
+const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+const spanOf = (s) => { const a = toMin(s.start), b = toMin(s.end); return [a, b <= a ? b + 1440 : b]; };   // an end at or before the start is the next day
+const usable = (s) => !!(s.date && s.start && s.end);
+const flagged = (s) => !!(s.fuzzy || s.dateGuess || s.timeUnsure || !s.date);
+const hoursOf = (list) => list.reduce((n, s) => n + (spanOf(s)[1] - spanOf(s)[0]) / 60, 0);
+const fmtHours = (h) => String(Math.round(h * 10) / 10);
+const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+const mondayOf = (iso) => addDays(iso, -((dowOf(iso) + 6) % 7));
+// Dates a total covers: the board's week if every shift is on it, else first to last
+const rangeLabel = (list, days) => {
+  const d = list.map((s) => s.date).sort(), [a, b] = d.every((x) => days.includes(x)) ? [days[0], days[6]] : [d[0], d[d.length - 1]];
+  const [m1, d1] = monthDay(a), [m2, d2] = monthDay(b);
+  return `${m1}월 ${d1}일` + (a === b ? '' : ` – ${m1 === m2 ? '' : m2 + '월 '}${d2}일`);
+};
+const dayCell = (iso) => el('span', { className: 'sh-day' }, el('b', { textContent: iso ? DOW[dowOf(iso)] : '?' }), el('i', { textContent: iso ? String(monthDay(iso)[1]) : '' }));
+const subText = (s) => (s.date ? `${monthDay(s.date)[0]}월 ${monthDay(s.date)[1]}일` : '날짜 없음') + (s.start && s.end ? ` · ${fmtHours(hoursOf([s]))}시간` : '');
+
+// The week board. Seven day columns on one time axis that runs from a little before the
+// earliest shift to a little after the latest; every block is placed from its real times.
+const BOARD_H = 196;
+function paintBoard(host, list, { ghost = false, animate = false, onTap = null, pop = null } = {}) {
+  // The week holding the most shifts (the earlier on a tie), so one stray date cannot move the board
+  const dated = list.filter(usable), mons = dated.map((s) => mondayOf(s.date)).sort(), tally = (m) => mons.filter((x) => x === m).length;
+  const monday = mons.reduce((best, m) => (tally(m) > tally(best) ? m : best), mons[0] || mondayOf(todayIso()));
+  const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+  const inWeek = dated.filter((s) => days.includes(s.date));
+  let lo = 9 * 60, hi = 18 * 60;
+  if (inWeek.length) { lo = Math.min(...inWeek.map((s) => spanOf(s)[0])); hi = Math.max(...inWeek.map((s) => spanOf(s)[1])); }
+  lo = Math.max(0, Math.floor((lo - 30) / 60) * 60); hi = Math.ceil((hi + 30) / 60) * 60;
+  const range = hi - lo, y = (min) => (min - lo) / range * BOARD_H;
+  const step = range <= 540 ? 2 : range <= 1080 ? 3 : 6, today = todayIso();
+
+  const head = el('div', { className: 'wk-head' }, el('span'));
+  days.forEach((d, i) => {
+    const on = ghost || inWeek.some((s) => s.date === d && s.checked !== false);
+    head.append(el('div', { className: 'wk-d' + (on ? ' on' : '') + (d === today ? ' today' : '') },
+      el('b', { textContent: DOW[(i + 1) % 7] }), el('i', { textContent: String(monthDay(d)[1]) }), d === today ? el('span', { className: 'vh', textContent: '오늘' }) : ''));
+  });
+  const body = el('div', { className: 'wk-body' }), axis = el('div', { className: 'wk-axis', ariaHidden: 'true' });
+  body.style.height = BOARD_H + 'px';
+  for (let h = Math.ceil(lo / 60 / step) * step; h * 60 <= hi; h += step) {
+    const top = y(h * 60);
+    if (top < 7 || top > BOARD_H - 7) continue;
+    const tick = el('span', { textContent: String(h % 24) }), line = el('i', { className: 'wk-line' });
+    tick.style.top = line.style.top = top.toFixed(1) + 'px';
+    axis.append(tick); body.append(line);
+  }
+  const cols = days.map(() => el('div', { className: 'wk-col' }));
+  body.append(axis, ...cols);
+  // Shifts that overlap on one day share its column side by side, without the times
+  const lane = new Map();
+  for (const d of days) {
+    let g = [], end = 0;
+    for (const s of inWeek.filter((s) => s.date === d).sort((p, q) => spanOf(p)[0] - spanOf(q)[0])) {
+      if (spanOf(s)[0] >= end) g = [];
+      g.push(s); lane.set(s, g); end = Math.max(end, spanOf(s)[1]);
+    }
+  }
+  inWeek.forEach((s, i) => {
+    const [a, b] = spanOf(s), top = y(a), h = Math.max(8, y(b) - top), g = lane.get(s), n = g.length;
+    const blk = el('span', { className: 'wk-blk' + (ghost ? ' ghost' : '') + (s.checked === false ? ' off' : '') + (flagged(s) ? ' flag' : '') + (s === pop ? ' pop' : '') });
+    blk.style.height = h.toFixed(1) + 'px'; blk.style.setProperty('--i', i);
+    if (!ghost && n < 2 && h >= 22) blk.append(el('b', { textContent: s.start }));
+    if (!ghost && n < 2 && h >= 44) blk.append(el('i', { textContent: s.end }));
+    const col = cols[days.indexOf(s.date)];
+    if (ghost || !onTap) { blk.style.top = top.toFixed(1) + 'px'; col.append(blk); return; }
+    // The tap area is never smaller than 44px even when the block itself is short
+    const hitH = Math.max(44, h), hit = el('button', { type: 'button', className: 'wk-hit' }, blk);
+    hit.style.top = (top - (hitH - h) / 2).toFixed(1) + 'px'; hit.style.height = hitH.toFixed(1) + 'px';
+    blk.style.top = ((hitH - h) / 2).toFixed(1) + 'px';
+    if (n > 1) { hit.style.left = g.indexOf(s) / n * 100 + '%'; hit.style.right = (n - 1 - g.indexOf(s)) / n * 100 + '%'; }
+    hit.setAttribute('aria-label', `${prettyDate(s.date)} ${s.start}부터 ${s.end}까지` + (s.checked === false ? ', 뺀 근무' : '') + (flagged(s) ? ', 확인 필요' : '') + '. 목록에서 보기');
+    hit.addEventListener('click', () => onTap(s));
+    col.append(hit);
+  });
+  const wk = el('div', { className: 'wk' + (animate ? ' fresh' : '') }, head, body);
+  if (!ghost) {
+    const nOff = inWeek.filter((s) => s.checked === false).length, nOut = dated.length - inWeek.length, nBlank = list.length - dated.length;
+    const foot = el('div', { className: 'wk-foot' });
+    if (nOff) foot.append(el('span', { className: 'lg lg-off' }, el('i'), `뺀 근무 ${nOff}건`));
+    if (nOut) foot.append(el('span', { className: 'wk-out', textContent: `이 주 보드에 없는 ${nOut}건은 아래 목록에 있어요.` }));
+    if (nBlank) foot.append(el('span', { className: 'wk-out', textContent: `날짜나 시간이 빠진 ${nBlank}건은 아래 목록에서 채워 주세요.` }));
+    if (foot.firstChild) wk.append(foot);
+  }
+  host.replaceChildren(wk);
+  return days;
+}
+function flashRow(li) {
+  if (!li) return;
+  glide(li, 'center');
+  li.classList.remove('flash'); void li.offsetWidth; li.classList.add('flash');
+  clearTimeout(li._f); li._f = setTimeout(() => li.classList.remove('flash'), 1300);   // under reduced motion the outline is still
+}
+
+// A returning visitor gets the short layout: name as a tag in the corner, paste up front.
+// Decided once per visit so nothing jumps under a thumb while the name is being typed.
+const goCompact = () => { page.classList.add('compact'); nameEl.placeholder = '이름 입력'; };
+// The name tag is as wide as the name (a Hangul syllable is 1em, a Latin letter about .6em)
+const fitName = () => nameEl.style.setProperty('--nw', [...nameEl.value.trim()].reduce((n, ch) => n + (ch.charCodeAt(0) < 0x2e80 ? 0.62 : 1), 0).toFixed(2));
+const syncBar = () => document.documentElement.style.setProperty('--bar-h', ($('#bar').hidden ? 0 : $('#bar').offsetHeight) + 'px');
+// Only the title is cut short when the line runs out of room
+const paintSettings = () => $('#setVal').replaceChildren(el('span', { textContent: eventTitle() }), '· ' + (alarmEl.selectedOptions[0] ? alarmEl.selectedOptions[0].textContent : ''));
+
+// home | busy | result. "aside" marks the screens where reading another image is the side road.
+const setMode = (mode) => {
+  const aside = mode === 'result' || (mode === 'home' && page.classList.contains('has-incoming'));
+  page.dataset.mode = mode; page.classList.toggle('aside', aside);
+  if (mode !== 'result') page.classList.remove('none');
+  // Moved in the document too, so keyboard and screen-reader order match the screen
+  const pick = $('.pick'), next = $(aside ? '.help' : '#progress'), had = document.activeElement;
+  if (pick.nextElementSibling !== next) { next.before(pick); if (pick.contains(had)) had.focus({ preventScroll: true }); }
+};
+
+const rowOf = new Map();
+let fresh = false, touched = null;   // a new scan drops the blocks in; a toggled or edited shift pops
+let stale = null;   // the scan a new read is replacing; not painted again meanwhile
+
+const baseProgress = setProgress;
+setProgress = (frac, label) => {
+  baseProgress(frac, label);
+  const f = clamp(frac, 0, 1);
+  $('#progressBar').style.setProperty('--p', f.toFixed(3));
+  $('#progressPct').textContent = Math.round(f * 100) + '%';
+};
+
+// Over the outlines: mark each found cell like a highlighter pen on the printed table.
+// A dashed edge means the name was read a little differently.
+const basePreview = drawPreview;
+drawPreview = () => {
+  basePreview();
+  const c = $('#preview'), ctx = c.getContext('2d'), { W, geom } = scan, k = c.width / W, u = c.width / 528;
+  const under = ctx.lineWidth;   // the original's outline width, which the yellow must cover
+  for (const s of shifts) {
+    const box = [(s.entry.cx - geom.colW / 2) * k, (s.entry.cy - geom.pitch * 1.5) * k, geom.colW * k, geom.pitch * 2 * k];
+    ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#ffd95a'; ctx.fillRect(...box);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.setLineDash([]); ctx.lineWidth = Math.max(4 * u, under + 2); ctx.strokeStyle = '#ffc20d'; ctx.strokeRect(...box);
+    ctx.setLineDash(s.fuzzy ? [5 * u, 4 * u] : []); ctx.lineWidth = 1.25 * u; ctx.strokeStyle = '#12211a'; ctx.strokeRect(...box);
+  }
+  ctx.setLineDash([]);
+};
+
+// The original sets the button label, its disabled state and the Google Calendar links;
+// on top of that come the big figure and the board, both from the chosen shifts.
+const baseUpdate = updateAddButton;
+updateAddButton = () => {
+  baseUpdate();
+  const list = chosen(), btn = $('#addBtn');
+  btn.replaceChildren(face('cal', btn.textContent));
+  for (const a of $('#gcalLinks').children) a.append(icon('out'));
+  $('#figN').textContent = list.length;
+  $('#figH').textContent = fmtHours(hoursOf(list));
+  const days = paintBoard($('#board'), shifts, { animate: fresh, pop: touched, onTap: (s) => flashRow(rowOf.get(s)) });
+  $('#figSub').textContent = list.length ? '선택한 근무 합계 · ' + rangeLabel(list, days)
+    : shifts.some((s) => s.checked) ? '날짜와 시간을 채우면 추가할 수 있어요' : '선택한 근무가 없어요';
+  fresh = false; touched = null;
+  syncBar();
+};
+
+// The original row (checkbox, date and time text, flags, crop, edit fields) keeps all its
+// behaviour; here it is only rearranged into one compact line with the rest on demand.
+const baseItem = shiftItem;
+shiftItem = (s) => {
+  const li = baseItem(s), flag = flagged(s);
+  const check = li.querySelector('input[type=checkbox]'), when = li.querySelector('.when');
+  const thumb = li.querySelector('canvas'), edit = li.querySelector('details'), flags = [...li.querySelectorAll('.badge')];
+  const day = el('span'), sub = el('i');
+  const paint = () => {
+    day.replaceChildren(dayCell(s.date)); sub.textContent = subText(s); li.classList.toggle('off', !s.checked);
+    check.ariaLabel = `${prettyDate(s.date)} ${s.start}부터 ${s.end}까지 근무 추가`;
+  };
+  when.className = 'sh-when'; when.firstChild.hidden = true; when.append(sub);
+  flags.forEach((f) => { f.className = 'sh-flag'; });
+  edit.className = 'ed'; edit.open = !s.date; edit.firstChild.prepend(icon('pen'));
+  const more = el('div', { className: 'sh-more', hidden: !flag }, el('p', { className: 'cap', textContent: '원본 스케줄표에서 잘라 온 칸' }), thumb, edit);
+  const main = el('button', { type: 'button', className: 'sh-main' }, day, when, icon('chev'));
+  main.setAttribute('aria-expanded', String(flag));
+  main.addEventListener('click', () => {
+    more.hidden = !more.hidden;
+    li.classList.toggle('open', !more.hidden);
+    main.setAttribute('aria-expanded', String(!more.hidden));
+  });
+  li.className = 'sh' + (flag ? ' flag open' : '');
+  li.replaceChildren(el('div', { className: 'sh-row' }, el('label', { className: 'tog' }, check, el('span', { className: 'tog-box' }, icon('check'))), main), ...flags, more);
+  li.addEventListener('change', () => { touched = s; }, true);   // before the original handler repaints
+  li.addEventListener('change', paint);                           // after it has updated the shift
+  paint();
+  rowOf.set(s, li);
+  return li;
+};
+
+const baseRender = render;
+render = () => {
+  if (!scan || scan === stale) return;
+  fresh = true; rowOf.clear();
+  baseRender();
+  const none = !shifts.length, sure = shifts.some((s) => s.checked);
+  setMode('result'); goCompact(); fitName();
+  $('#ghost').hidden = true; $('#resultMore').hidden = false;
+  $('#result').classList.toggle('is-none', none); page.classList.toggle('none', none);
+  $('#result').classList.toggle('no-sure', !sure);
+  if (none) $('#figSub').after($('#resultNote')); else $('#board').after($('#resultNote'));
+  $('#origHint').textContent = none ? '읽은 표예요. 내 이름이 어떻게 적혀 있는지 확인해 보세요.'
+    : '형광펜으로 칠한 칸이 찾은 근무예요.' + (shifts.some((s) => s.fuzzy) ? ' 점선 칸은 이름이 조금 다르게 읽힌 곳이에요.' : '');
+  $('#sheet').hidden = $('#bar').hidden = none;
+  syncBar();
+};
+
+const baseHandle = handleImage;
+handleImage = async (blob) => {
+  if (busy) return;
+  stale = scan;
+  $('#resultMore').hidden = $('#bar').hidden = $('#ghost').hidden = true;
+  setMode('busy'); syncBar();
+  const done = baseHandle(blob);   // runs up to its first wait, so the progress board is on screen now
+  glide($('#progress'), 'center');
+  await done; stale = null;
+  if (scan) return glide($('#result'), 'start');   // the result is up: the original's scroll once more, instant under reduced motion
+  setMode('home');
+  $('#ghost').hidden = page.classList.contains('has-incoming');
+  glide($('#error'), 'nearest');
+};
+
+// Once the original wiring below has run: first paint of the parts this layer adds
+Promise.resolve().then(() => {
+  if (nameEl.value) goCompact();
+  if (needsSafari) page.classList.add('handoff');
+  fitName(); paintSettings();
+  nameEl.addEventListener('input', fitName);
+  nameEl.addEventListener('change', fitName);
+  titleEl.addEventListener('change', paintSettings);
+  alarmEl.addEventListener('change', paintSettings);
+  if ('ResizeObserver' in window) new ResizeObserver(syncBar).observe($('#bar'));
+  window.addEventListener('resize', syncBar);
+  document.addEventListener('touchstart', () => {}, { passive: true });   // lets iPhone show :active styles
+
+  // First screen: this week's board, empty, with outlines where shifts will land
+  const week = Array.from({ length: 7 }, (_, i) => addDays(mondayOf(todayIso()), i));
+  paintBoard($('#ghostBoard'), [[0, '07:00', '13:00'], [2, '13:00', '18:00'], [4, '17:00', '22:00'], [5, '09:00', '15:00']]
+    .map(([d, start, end]) => ({ date: week[d], start, end })), { ghost: true });
+
+  // Hand-over: the same board and rows for the shifts that came in through the link
+  if (incoming.length) {
+    goCompact(); page.classList.add('has-incoming'); setMode('home');
+    $('#ghost').hidden = true;
+    const rows = incoming.map((s) => el('li', { className: 'sh' }, el('div', { className: 'sh-row' }, dayCell(s.date),
+      el('span', { className: 'sh-when' }, el('span', { textContent: `${s.start} – ${s.end}` + (s.end <= s.start ? ' (다음 날)' : '') }), el('i', { textContent: subText(s) })))));
+    $('#incomingList').replaceChildren(...rows);
+    const days = paintBoard($('#incomingBoard'), incoming, { animate: true, onTap: (s) => flashRow(rows[incoming.indexOf(s)]) });
+    $('#incomingSub').textContent = `${rangeLabel(incoming, days)} · 모두 ${fmtHours(hoursOf(incoming))}시간`;
+    $('#incomingAdd').replaceChildren(face('cal', $('#incomingAdd').textContent));
+  }
+});
+
 const inChatApp = /KAKAOTALK|NAVER\(|Instagram|FBAN|FBAV|Line\//i.test(UA);
 // On iPhone only Safari can pass a calendar file to the Calendar app. In any other
 // iPhone browser the add button carries the chosen shifts over to Safari instead.
