@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&amp;display=swap&amp;text=%200123456789.%25%3F%EC%BA%98%EB%B0%94%EA%B7%BC%EB%AC%B4%ED%91%9C%EC%82%AC%EC%A7%84%EC%97%90%EC%84%9C%EB%82%B4%EB%A7%8C%EC%B0%BE%EC%95%84%EB%A6%B0%EB%8D%94%EB%84%A3%EC%96%B4%EC%9A%94%EC%9D%B4%EB%B2%88%EC%A3%BC%EC%8A%A4%EC%BC%80%EC%A4%84%EB%A5%BC%EB%B6%99%EC%97%AC%EC%84%B8%EC%9B%94%ED%99%94%EC%88%98%EB%AA%A9%EA%B8%88%ED%86%A0%EC%9D%BC%EA%B1%B4%EC%8B%9C%EA%B0%84%EB%84%98%EA%B2%A8%EB%B0%9B%EC%9D%80" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&amp;display=swap&amp;text=%200123456789.%25%3F%EC%BA%98%EB%B0%94%EA%B7%BC%EB%AC%B4%ED%91%9C%EC%82%AC%EC%A7%84%EC%97%90%EC%84%9C%EB%82%B4%EB%A7%8C%EC%B0%BE%EC%95%84%EB%A6%B0%EB%8D%94%EB%84%A3%EC%96%B4%EC%9A%94%EC%9D%B4%EB%B2%88%EC%A3%BC%EC%8A%A4%EC%BC%80%EC%A4%84%EB%A5%BC%EB%B6%99%EC%97%AC%EC%84%B8%EC%9B%94%ED%99%94%EC%88%98%EB%AA%A9%EA%B8%88%ED%86%A0%EC%9D%BC%EA%B1%B4%EC%8B%9C%EA%B0%84%EB%84%98%EA%B2%A8%EB%B0%9B%EC%9D%80%EB%85%84%EC%9B%90%2C" media="print" onload="this.media='all'">
 <style>
 /* 주간 보드: a Subway-green wall, white boards on it, ink for type, Subway yellow only for "press here" and "look here" */
 :root {
@@ -59,7 +59,7 @@
   }
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; background: var(--field); }
+html { -webkit-text-size-adjust: 100%; background: var(--field); scroll-padding-bottom: calc(var(--bar-h) + 16px); }   /* what is scrolled to or focused stays clear of the bottom bar */
 body {
   margin: 0; min-height: 100dvh; color: var(--on-field);
   background:
@@ -153,7 +153,7 @@ body.compact #name:placeholder-shown + .nf-pen { color: var(--on-field); }
 .btn-line:active { transform: scale(.975); background: var(--field-2); }
 .btn-line.sm { width: auto; min-height: 46px; display: inline-flex; font-size: 14.5px; }
 .txt { display: flex; align-items: center; gap: 9px; min-height: 46px; padding: 6px 2px; font-weight: 700; font-size: 14.5px; text-align: left; color: var(--on-field); background: none; border: 0; cursor: pointer; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; transition: transform .09s ease-out; }
-.txt:active { transform: scale(.98); opacity: .8; }
+.txt:active { transform: scale(.98); text-decoration-thickness: 2.5px; }
 .txt .ic { width: 19px; height: 19px; }
 .txt + .txt { margin-top: -12px; }
 
@@ -322,11 +322,11 @@ canvas.thumb { display: block; max-width: 100%; height: auto; border-radius: 8px
 /* ---- folds (settings, help, google calendar) ---- */
 .fold { margin-bottom: -16px; border-top: 1.5px solid var(--field-line); }
 .fold[open], .fold.sub { margin-bottom: 0; }
-.fold > summary { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 2px; font-weight: 700; font-size: 15.5px; cursor: pointer; list-style: none; }
+.fold > summary { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 2px; font-weight: 700; font-size: 15.5px; cursor: pointer; list-style: none; transition: transform .09s ease-out; }
 .fold > summary::-webkit-details-marker { display: none; }
 .fold > summary > .ic { margin-left: auto; width: 20px; height: 20px; color: var(--on-field-2); transition: transform .18s ease-out; }
 .fold[open] > summary > .ic { transform: rotate(180deg); }
-.fold > summary:active { opacity: .7; }
+.fold > summary:active { transform: scale(.98); }
 .fold > summary > span:first-child { flex: none; }
 .fold-val { display: flex; gap: .3em; min-width: 0; margin-left: auto; white-space: nowrap; font-size: 13.5px; font-weight: 600; color: var(--on-field-2); }
 .fold-val span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -366,6 +366,142 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
 #toast { position: fixed; left: 50%; bottom: max(calc(18px + env(safe-area-inset-bottom)), calc(var(--bar-h) + 12px)); z-index: 30; width: max-content; max-width: min(92vw, 520px); padding: 12px 16px; border-radius: 14px 14px 14px 4px; background: var(--pop); color: var(--on-pop); font-size: 14px; font-weight: 700; line-height: 1.4; text-align: center; box-shadow: 0 0 0 1.5px var(--field-line), 0 10px 24px -8px rgba(0, 0, 0, .5); opacity: 0; transform: translate(-50%, 14px) scale(.96); transition: opacity .18s ease-out, transform .28s var(--spring); pointer-events: none; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* ==== month view (월급 · 근무시간): view switch, totals, pay, manager report, month board, work log ==== */
+.mo-label, .pay-n, .mo-head b { font-synthesis: none; }
+/* -- the two views: body[data-view] decides which sections are on the page -- */
+.top { grid-template-areas: "brand brand" "seg seg" "hl hl" "name name"; }
+body.compact .top { grid-template-areas: "brand name" "seg seg" "hl hl"; }
+.seg { grid-area: seg; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; border-radius: 15px; background: var(--field-2); box-shadow: inset 0 0 0 1.5px var(--field-line); }
+.seg button { min-height: 44px; padding: 6px 8px; font: 700 15px/1.2 var(--body); color: var(--on-field); background: none; border: 0; border-radius: 12px; cursor: pointer; transition: transform .09s ease-out; }
+.seg button[aria-pressed="true"] { font-weight: 800; color: var(--chip-ink); background: var(--chip); box-shadow: 0 2px 0 var(--field-3); }
+.seg button:active { transform: scale(.97); }
+@media (hover: hover) { .seg button[aria-pressed="false"]:hover { background: var(--field-3); } }
+/* the month view has no headline or big name field, so their rows go too */
+body[data-view="month"] .top { grid-template-areas: "brand brand" "seg seg"; }
+body[data-view="month"].compact .top { grid-template-areas: "brand name" "seg seg"; }
+#month { display: none; gap: 16px; }
+body[data-view="month"] #month { display: grid; }
+body[data-view="month"] #inapp, body[data-view="month"] .hl, body[data-view="month"] #incoming, body[data-view="month"] .pick,
+body[data-view="month"] #progress, body[data-view="month"] #error, body[data-view="month"] #ghost, body[data-view="month"] #result,
+body[data-view="month"] #settings, body[data-view="month"] #resultMore, body[data-view="month"] #bar,
+body[data-view="month"]:not(.compact) .namefield, body:not([data-view="month"]) #mbar { display: none !important; }
+
+/* -- the weekly result: estimated pay under the figure, and saving without the calendar.
+      The estimate sits on the line of the date range when there is room and wraps under it as one piece when not;
+      the dot between them hangs in the gap, so at the start of a wrapped line it is outside the box and clipped -- */
+#figSub { display: flex; flex-wrap: wrap; column-gap: 1em; overflow: hidden; }
+.fig-pay { position: relative; }
+.fig-pay::before { content: "·"; content: "·" / ""; position: absolute; left: -1em; width: 1em; text-align: center; }
+.fig-pay b { font-weight: 800; color: var(--on-field); }
+.log-row { display: grid; padding: 0 2px; }
+.log-row .hint { margin-top: -2px; }
+
+/* -- month: which month, the answer -- */
+.mo-hero { display: grid; gap: 6px; padding: 0 2px; }
+.mo-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.mo-label { flex: 1; min-width: 0; font: 900 27px/1.15 var(--display); letter-spacing: -.01em; }
+.mo-step { flex: none; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; color: var(--on-field); background: none; border: 2px solid var(--field-line); border-radius: 15px; cursor: pointer; transition: transform .09s ease-out; }
+.mo-step .ic { transform: rotate(90deg); }   /* the one chevron in the sprite points down */
+#monthNext .ic { transform: rotate(-90deg); }
+.mo-step:active { transform: scale(.94); background: var(--field-2); }
+@media (hover: hover) { .mo-step:hover { border-color: var(--on-field-2); background: var(--field-2); } }
+.mo-night { display: flex; align-items: center; gap: 7px; font: 800 16.5px/1.3 var(--body); font-variant-numeric: tabular-nums; }
+.mo-night .ic { width: 17px; height: 17px; }
+.mo-empty { display: grid; gap: 10px; padding-top: 4px; }
+.mo-empty h3 { font: 900 27px/1.22 var(--body); letter-spacing: -.02em; }
+.mo-empty .hint { font-size: 14.5px; }
+.mo-empty .slab { margin-top: 6px; }
+#month.is-empty #mTotal, #month.is-empty #mNight, #month.is-empty .pay-top, #month.is-empty .rep, #month.is-empty #monthList { display: none; }
+/* an empty month: the board that will fill up comes straight after the way back; the wage stays readable under it */
+#month.is-empty #payCard { order: 1; }
+#month.is-empty #logFold, #month.is-empty .mo-keep { order: 2; }
+
+/* -- month: estimated pay and the hourly wage, on a board -- */
+.pay { display: grid; gap: 12px; padding: 16px 16px 12px; }
+.pay-top { display: grid; gap: 3px; }
+.pay-h { font: 800 14px/1.3 var(--body); }
+.pay-n { font: 900 42px/1.08 var(--display); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.pay-rows { display: grid; gap: 7px; margin: 9px 0 0; padding-top: 11px; border-top: 1.5px solid var(--board-line); }
+.pay-rows div { display: flex; align-items: baseline; justify-content: space-between; gap: 4px 12px; flex-wrap: wrap; font-size: 14.5px; line-height: 1.35; font-variant-numeric: tabular-nums; }
+.pay-rows dt { font-weight: 600; color: var(--ink-2); }
+.pay-rows dt .ic, .sh-when i .ic { width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; color: var(--ink); }
+.pay-rows dd { margin: 0 0 0 auto; font-weight: 800; }
+.pay-wage { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.won { position: relative; display: block; }
+.won input { padding-right: 34px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+/* the field holds plain digits (what the number pad types); at rest the same amount is shown over it with separators */
+.won input:not(:focus) { color: transparent; }
+.won input::placeholder { color: var(--ink-2); opacity: 1; }
+.won b { position: absolute; right: 36px; top: 50%; transform: translateY(-50%); font: 800 16px/1.3 var(--body); font-variant-numeric: tabular-nums; color: var(--ink); pointer-events: none; }
+.won input:focus + b { display: none; }
+.won i, .ro-val i { font-style: normal; font-size: 16px; font-weight: 700; color: var(--ink-2); }
+.won i { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.ro-val { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-height: 48px; padding: 10px 13px; border-radius: 12px; background: var(--board-2); color: var(--ink); font: 800 16px/1.3 var(--body); font-variant-numeric: tabular-nums; }
+.pay-foot { display: grid; justify-items: start; gap: 6px; margin-top: -4px; }
+.pay-foot .cap { line-height: 1.5; text-wrap: pretty; }
+.lnk { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; font: 700 13.5px/1.3 var(--body); color: var(--ink); background: none; border: 0; cursor: pointer; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.lnk:active { opacity: .7; }
+@media (hover: hover) { .lnk:hover { text-decoration-thickness: 2.5px; } }
+
+/* -- month: the two lines for the manager. Dashed like the other text that is there to be copied (the Shortcut address),
+      and not an ink slab: the toast that confirms the copy lands right on top of it -- */
+.rep { display: grid; gap: 8px; padding: 0 2px; }
+.rep h3 { font: 800 15px/1.3 var(--body); }
+#report { position: relative; margin: 0; padding: 12px 15px 13px; white-space: pre-wrap; font: 800 clamp(15px, 4.4vw, 17px)/1.6 var(--body); letter-spacing: -.01em; color: var(--on-field); background: var(--field-2); border: 2px dashed var(--field-edge); border-radius: 16px 16px 16px 4px; -webkit-user-select: all; user-select: all; }
+
+#report.flash::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; box-shadow: inset 0 0 0 3px var(--on-field); pointer-events: none; opacity: 0; animation: flash 1.2s ease-out; }
+
+/* -- month: the board. One cell per day, weeks from Monday; a worked day is a green block -- */
+.mo { padding: 13px 5px 9px; }
+.mo-head, .mo-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.mo-head b { padding-bottom: 7px; text-align: center; font: 900 17px/1 var(--display); color: var(--ink-2); }
+.mo-c { position: relative; display: block; padding: 2px; border: 0; background: none; text-align: left; }
+button.mo-c { cursor: pointer; }
+button.mo-c:focus-visible { outline-offset: -1px; }
+.mo-b { position: relative; display: block; height: 48px; border-radius: 10px; background: var(--board-2); color: var(--ink-2); }
+.mo-b i { position: absolute; left: 3px; top: 4px; min-width: 20px; padding: 0 3px; border-radius: 6px; font: 700 11.5px/1.4 var(--body); font-variant-numeric: tabular-nums; text-align: center; }
+.mo-b b { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font: 800 16px/1 var(--body); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.mo-b b.sm { bottom: 9px; font-size: 12.5px; }
+.mo-b .ic { position: absolute; right: 5px; top: 6px; width: 11px; height: 11px; }
+.mo-c.on .mo-b { background: var(--block); color: var(--on-block); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .22); transition: transform .1s ease-out; }
+.mo-c.today .mo-b i { background: var(--accent); color: var(--accent-ink); font-weight: 800; }
+.mo-c.ghost .mo-b { background: none; border: 2px dashed var(--ghost); }
+.mo-c.ghost .mo-b i { left: 1px; top: 2px; }
+#monthBoard .ghost-tag { top: 181px; padding: 6px 13px; transform: translate(-50%, -50%) rotate(-1deg); }   /* in the 36px between the dates of the third week and those of the fourth, touching neither */
+@media (hover: hover) { button.mo-c:hover .mo-b { transform: translateY(-2px); } .mo-del:hover { color: var(--ink); } }
+button.mo-c:active .mo-b { transform: scale(.93); }
+.mo.fresh .mo-c.on .mo-b { animation: drop .38s var(--spring) both; animation-delay: calc(var(--i) * 35ms + 60ms); }
+.mo .wk-foot { justify-content: space-between; padding: 8px 6px 0 7px; }
+.mo .lg .ic { width: 12px; height: 12px; }
+.mo-del { flex: none; align-self: stretch; display: grid; place-items: center; width: 50px; min-height: 48px; padding: 0; color: var(--ink-2); background: none; border: 0; cursor: pointer; transition: transform .09s ease-out; }
+.mo-del .ic { width: 20px; height: 20px; }
+.mo-del:active { transform: scale(.86); }
+.mo-del:focus-visible { outline-offset: -4px; }
+.sh-when small { font-size: 13px; font-weight: 600; letter-spacing: 0; color: var(--ink-2); }
+
+/* -- month: adding by hand, and where the record lives -- */
+.fold-body .note { padding: 0; background: none; border: 0; color: var(--on-field); }
+.fold-body .btn-line { margin-top: 2px; }
+#logFold input { color-scheme: dark; }   /* the field is dark in both schemes: keeps the browser's own picker marks light */
+.mo-keep { padding-top: 16px; border-top: 1.5px solid var(--field-line); text-wrap: pretty; }
+
+/* -- a toast that offers one action (undo) -- */
+#toast { --focus: var(--on-pop); text-wrap: balance; white-space: pre-line; }   /* a message of two sentences breaks between them */
+#logErr { text-wrap: balance; }
+#toast.act { display: flex; align-items: center; gap: 6px; padding: 4px 6px 4px 16px; text-align: left; }
+#toast.act.show { pointer-events: auto; }
+#toast button { flex: none; min-width: 44px; min-height: 44px; padding: 0 10px; font: 800 14px/1 var(--body); color: inherit; background: none; border: 0; border-radius: 10px; cursor: pointer; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+#toast button:active { opacity: .7; }
+@media (hover: hover) { #toast button:hover { text-decoration-thickness: 2.5px; } }
+
+@media (max-width: 374px) {
+  .seg button { font-size: 14.5px; }
+  .pay-n { font-size: 38px; }
+  .pay { padding-left: 14px; padding-right: 14px; }
+}
+@media (max-width: 389px) { #report { padding-left: 12px; padding-right: 12px; } }   /* with the smaller type, keeps the second line whole on 360 and 375 wide phones */
+/* ==== end of the month view styles ==== */
+
 @media (max-width: 374px) {
   .hl { font-size: 32px; }
   .hl-back { font-size: 28px; }
@@ -375,11 +511,11 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .sh.flash::after { opacity: 1; }
+  .sh.flash::after, #report.flash::after { opacity: 1; }
 }
 </style>
 </head>
-<body data-mode="home">
+<body data-mode="home" data-view="week">
 <svg class="sprite" aria-hidden="true">
   <symbol id="i-paste" viewBox="0 0 24 24"><path d="M9 5.5H7.5a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7.5a2 2 0 0 0-2-2H15"/><rect x="9" y="3.5" width="6" height="4" rx="1.2"/><path d="M9 12h6M9 16h3.5"/></symbol>
   <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.5"/><path d="m5 17.5 4.5-4.5 3.5 3 2.5-2 3.5 3.5"/></symbol>
@@ -391,6 +527,9 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11.5" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 7.5l4-4 4 4M6 12v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M21 13.6A9.2 9.2 0 1 1 10.4 3a7.3 7.3 0 0 0 10.6 10.6z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7.5h14M10 7.5V5h4v2.5M7 7.5l.8 10.6a2 2 0 0 0 2 1.9h4.4a2 2 0 0 0 2-1.9L17 7.5M10.2 11.5v4.5M13.8 11.5v4.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
 </svg>
 <main>
   <div id="inapp" class="notice" hidden>
@@ -402,6 +541,10 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
 
   <header class="top">
     <div class="brand"><h1 class="mark">캘바</h1><span class="mark-sub">CALBA</span></div>
+    <div class="seg" role="group" aria-label="화면 선택">
+      <button id="tabWeek" type="button" aria-pressed="true">스케줄표 읽기</button>
+      <button id="tabMonth" type="button" aria-pressed="false">월급 · 근무시간</button>
+    </div>
     <p class="hl hl-first">근무표 사진에서<br>내 근무만 찾아<br>캘린더에 넣어요.</p>
     <p class="hl hl-back">이번 주 스케줄표를<br>붙여넣어 주세요.</p>
     <label class="namefield">
@@ -460,7 +603,7 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
     <div class="hero">
       <h2 id="resultTitle"></h2>
       <p class="fig" aria-live="polite"><b id="figN">0</b><span>건</span><b id="figH">0</b><span>시간</span></p>
-      <p id="figSub" class="fig-sub"></p>
+      <p id="figSub" class="fig-sub"><span id="figPay" class="fig-pay" hidden></span></p>
     </div>
     <div id="namePicker" class="picker" hidden>
       <p class="hint">표에서 읽은 이름이에요. 본인 이름을 누르면 바로 찾아요.</p>
@@ -470,6 +613,10 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
       <div id="board" role="group" aria-label="주간 보드"></div>
       <p id="resultNote" class="note" hidden></p>
       <ul id="shifts" class="shifts"></ul>
+    </div>
+    <div id="logRow" class="log-row" hidden>
+      <button id="logOnly" class="txt" type="button"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>캘린더 없이 기록만 남기기</button>
+      <p class="hint">캘린더에 추가한 근무는 “월급 · 근무시간”에 자동으로 모여요. 스케줄이 바뀌어 없어진 근무는 거기서 직접 지워 주세요.</p>
     </div>
   </section>
 
@@ -508,6 +655,77 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
     </details>
   </section>
 
+  <!-- month view: what the saved work log adds up to. Shown instead of the week sections when body[data-view="month"] -->
+  <section id="month" aria-label="월급과 근무시간">
+    <p id="logLost" class="notice" role="status" hidden><span>이 브라우저에서는 기록을 저장할 수 없어요.<br>창을 닫으면 사라져요.</span></p>
+    <div class="mo-hero">
+      <div class="mo-nav">
+        <h2 id="monthLabel" class="mo-label" aria-live="polite"></h2>
+        <button id="monthPrev" class="mo-step" type="button" aria-label="이전 달"><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        <button id="monthNext" class="mo-step" type="button" aria-label="다음 달"><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      </div>
+      <p id="mTotal" class="fig"><b>0</b><span>시간</span></p>
+      <p id="mNight" class="mo-night"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span id="mNightText">야간 0일 · 0시간</span></p>
+      <div id="monthEmpty" class="mo-empty" hidden>
+        <h3 id="emptyTitle">아직 기록이 없어요</h3>
+        <p class="hint">스케줄표를 읽고 캘린더에 추가하면 그 근무가 여기에 모여요. 월말에 근무시간과 예상 급여를 바로 볼 수 있어요.</p>
+        <button id="monthGo" class="slab" type="button"><span class="face"><svg class="ic" aria-hidden="true"><use href="#i-paste"/></svg><span>스케줄표 읽으러 가기</span></span></button>
+        <button id="monthJump" class="btn-line" type="button" hidden></button>
+      </div>
+    </div>
+
+    <div id="payCard" class="sheet pay">
+      <div class="pay-top">
+        <h3 class="pay-h">예상 급여</h3>
+        <p id="mPay" class="pay-n">0원</p>
+        <p class="cap">세금을 떼기 전 금액이에요.</p>
+        <dl class="pay-rows">
+          <div><dt id="payBaseL"></dt><dd id="payBase"></dd></div>
+          <div><dt id="payNightL"></dt><dd id="payNight"></dd></div>
+        </dl>
+      </div>
+      <div class="pay-wage">
+        <label class="field">시급
+          <span class="won"><input id="wage" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" maxlength="6" aria-describedby="wageHint"><b id="wageShow" aria-hidden="true"></b><i aria-hidden="true">원</i></span>
+        </label>
+        <div class="field"><span id="nightWageL">야간 시급 · 1.5배</span>
+          <output id="nightWage" class="ro-val" aria-live="off" aria-labelledby="nightWageL"></output>
+        </div>
+      </div>
+      <div class="pay-foot">
+        <p id="wageHint" class="cap" tabindex="-1"></p>
+        <button id="wageReset" class="lnk" type="button" hidden>최저시급으로 되돌리기</button>
+      </div>
+    </div>
+
+    <div class="rep">
+      <h3>점장님께 보낼 내용</h3>
+      <pre id="report"></pre>
+    </div>
+
+    <div class="sheet">
+      <div id="monthBoard" role="group" aria-label="월간 보드"></div>
+      <ul id="monthList" class="shifts ro"></ul>
+    </div>
+
+    <details id="logFold" class="fold">
+      <summary><span>근무 직접 추가</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="fold-body">
+        <p class="hint">스케줄표에 없던 근무나 빠진 날을 여기서 넣어요.</p>
+        <div class="edit">
+          <label class="field wide">날짜<input id="logDate" type="date" min="2000-01-01" max="2099-12-31"></label>
+          <label class="field">시작<input id="logStart" type="time"></label>
+          <label class="field">종료<input id="logEnd" type="time"></label>
+        </div>
+        <p id="logPreview" class="hint" hidden></p>
+        <p id="logErr" class="note" role="alert" hidden></p>
+        <button id="logAdd" class="btn-line" type="button"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>기록에 추가</button>
+      </div>
+    </details>
+
+    <p class="priv mo-keep"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span>기록은 이 기기에서 지금 연 곳에만 저장되고, 어디에도 전송하지 않아요. 아이폰에서는 Safari, 카카오톡 안 화면, 홈 화면의 캘바가 기록을 각각 따로 보관해요. Safari는 한동안 열지 않은 사이트의 기록을 지울 수 있어요. 홈 화면에 추가한 캘바의 기록은 그렇게 지워지지 않아요. 한곳에서 계속 쓰는 게 좋아요. 다른 곳에서 넣었거나 빠진 주는 그 주 스케줄표를 여기서 다시 읽으면 채워져요.</span></p>
+  </section>
+
   <details class="fold help">
     <summary>앱처럼 쓰는 방법 (아이폰 · 갤럭시)<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></summary>
     <div class="fold-body">
@@ -540,6 +758,11 @@ code.url { display: block; padding: 12px; word-break: break-all; font: 13px/1.45
     <p id="addHint" class="bar-hint" hidden></p>
   </div>
 </div>
+<div id="mbar" class="bar" hidden>
+  <div class="bar-in">
+    <button id="copyReport" class="slab" type="button"><span class="face"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg><span>보낼 내용 복사</span></span></button>
+  </div>
+</div>
 <div id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
@@ -567,7 +790,8 @@ const isIOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === 'MacIntel'
    Everything after this block (settings, reader, matcher, calendar file, wiring) is the
    original code, untouched. This block wraps the functions that paint the screen: each
    original still runs and owns the data; the wrapper lays its output out as the week
-   board, the totals and the compact list. */
+   board, the totals and the compact list. The month view (work log, pay, manager report)
+   is a separate section at the end of the script. */
 const page = document.body;
 const icon = (name) => {
   const NS = 'http://www.w3.org/2000/svg', s = document.createElementNS(NS, 'svg'), u = document.createElementNS(NS, 'use');
@@ -586,8 +810,8 @@ const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
 const spanOf = (s) => { const a = toMin(s.start), b = toMin(s.end); return [a, b <= a ? b + 1440 : b]; };   // an end at or before the start is the next day
 const usable = (s) => !!(s.date && s.start && s.end);
 const flagged = (s) => !!(s.fuzzy || s.dateGuess || s.timeUnsure || !s.date);
-const hoursOf = (list) => list.reduce((n, s) => n + (spanOf(s)[1] - spanOf(s)[0]) / 60, 0);
-const fmtHours = (h) => String(Math.round(h * 10) / 10);
+const hoursOf = (list) => list.reduce((n, s) => n + spanOf(s)[1] - spanOf(s)[0], 0) / 60;   // summed in whole minutes, divided once
+const fmtHours = (h) => String(Math.round(h * 100) / 100);   // 3, 3.5, 3.25: the same text the month view and the report show
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
 const mondayOf = (iso) => addDays(iso, -((dowOf(iso) + 6) % 7));
 // Dates a total covers: the board's week if every shift is on it, else first to last
@@ -681,7 +905,8 @@ function flashRow(li) {
 const goCompact = () => { page.classList.add('compact'); nameEl.placeholder = '이름 입력'; };
 // The name tag is as wide as the name (a Hangul syllable is 1em, a Latin letter about .6em)
 const fitName = () => nameEl.style.setProperty('--nw', [...nameEl.value.trim()].reduce((n, ch) => n + (ch.charCodeAt(0) < 0x2e80 ? 0.62 : 1), 0).toFixed(2));
-const syncBar = () => document.documentElement.style.setProperty('--bar-h', ($('#bar').hidden ? 0 : $('#bar').offsetHeight) + 'px');
+// Whichever bottom bar is on screen (the week's add bar or the month's copy bar; a bar that is not shown measures 0)
+const syncBar = () => document.documentElement.style.setProperty('--bar-h', Math.max($('#bar').offsetHeight, $('#mbar').offsetHeight) + 'px');
 // Only the title is cut short when the line runs out of room
 const paintSettings = () => $('#setVal').replaceChildren(el('span', { textContent: eventTitle() }), '· ' + (alarmEl.selectedOptions[0] ? alarmEl.selectedOptions[0].textContent : ''));
 
@@ -1582,8 +1807,443 @@ if (incoming.length) $('#shortcutUrl').textContent = appUrl(); else syncUrl();
 // Warm the engine up so the first paste doesn't wait on the download
 window.addEventListener('load', () => setTimeout(() => initOcr().catch(() => {}), 300));
 
+/* ---------- month view: work log, pay estimate, manager report ----------
+   Added with the monthly view. Nothing here reads the scan or changes what goes into the
+   calendar: it keeps a copy of the shifts that were added (on this device only) and adds
+   them up by month. Storage is { d: 'YYYY-MM-DD', s: 'HH:MM', e: 'HH:MM' } under shiftcal.log. */
+
+// --- the calculation: small pure functions ---
+const MIN_WAGE = { 2025: 10030, 2026: 10320, 2027: 10700 };   // legal minimum hourly wage in won, by year
+const NIGHT_RATE = 1.5;
+// Night work is 22:00–01:00. In minutes from midnight of the day the shift starts: the first
+// hour of that day, that evening into the next day, and the evening after (a very long shift).
+const NIGHT_SPANS = [[-120, 60], [1320, 1500], [2760, 2940]];
+const wageYear = (year) => { const known = Object.keys(MIN_WAGE).map(Number); return clamp(year, known[0], known[known.length - 1]); };
+const minWage = (year) => MIN_WAGE[wageYear(year)];
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const span = (x) => spanOf({ start: x.s, end: x.e });   // [from, to) in minutes; an end at or before the start is the next day
+// Anything that is not two HH:MM times has no night minutes (never NaN, never a throw)
+const nightMinutes = (start, end) => {
+  const s = String(start).slice(0, 5), e = String(end).slice(0, 5);
+  if (!TIME_RE.test(s) || !TIME_RE.test(e)) return 0;
+  const [a, b] = spanOf({ start: s, end: e });
+  return NIGHT_SPANS.reduce((n, [lo, hi]) => n + Math.max(0, Math.min(b, hi) - Math.max(a, lo)), 0);
+};
+const fmtH = (min) => String(Math.round(min / 60 * 100) / 100);   // 180 → 3, 210 → 3.5, 195 → 3.25
+const won = (n) => { const [whole, frac] = String(Math.round(n * 10) / 10).split('.'); return whole.replace(/\B(?=(\d{3})+$)/g, ',') + (frac ? '.' + frac : ''); };
+const tally = (entries) => {
+  let totalMin = 0, nightMin = 0;
+  const nights = new Set();
+  for (const x of entries) {
+    const [a, b] = span(x), n = nightMinutes(x.s, x.e);
+    totalMin += b - a; nightMin += n;
+    if (n) nights.add(x.d);
+  }
+  return { totalMin, nightMin, nightDays: nights.size };
+};
+// round(regular hours × wage + night hours × wage × 1.5); the two parts are shown so that they add up to it
+const payOf = ({ totalMin, nightMin }, wage) => {
+  const pay = Math.round(((totalMin - nightMin) * wage + nightMin * wage * NIGHT_RATE) / 60), basePay = Math.round((totalMin - nightMin) * wage / 60);
+  return { basePay, nightPay: pay - basePay, pay };
+};
+const reportText = (t) => `총 근무시간 : ${fmtH(t.totalMin)}시간\n야간 근무시간 : ${fmtH(t.totalMin)}시간 중, ${t.nightDays}일/${fmtH(t.nightMin)}시간`;
+const YM_RE = /^20\d\d-(0[1-9]|1[0-2])$/;
+const keyOf = (x) => x.d + ' ' + x.s + ' ' + x.e;
+// Whatever comes in (storage, a test, a batch): only well-formed entries, no exact duplicates, by date then start
+const cleanLog = (list) => {
+  const seen = new Set(), out = [];
+  for (const x of Array.isArray(list) ? list : []) {
+    if (!x || typeof x.d !== 'string' || typeof x.s !== 'string' || typeof x.e !== 'string') continue;
+    if (parseDate(x.d) !== x.d || !TIME_RE.test(x.s) || !TIME_RE.test(x.e) || seen.has(keyOf(x))) continue;
+    seen.add(keyOf(x)); out.push(x.m ? { d: x.d, s: x.s, e: x.e, m: 1 } : { d: x.d, s: x.s, e: x.e });
+  }
+  return out.sort((p, q) => keyOf(p).localeCompare(keyOf(q)));
+};
+const absSpan = (x) => { const [y, m, d] = x.d.split('-').map(Number), day = Date.UTC(y, m - 1, d) / 60000, [a, b] = span(x); return [day + a, day + b]; };
+const overlaps = (p, q) => { const [a, b] = absSpan(p), [c, d] = absSpan(q); return a < d && c < b; };
+const ymShift = (ym, n) => { const [y, m] = ym.split('-').map(Number), d = new Date(Date.UTC(y, m - 1 + n, 1)); return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}`; };
+
+// --- the saved log and the wage ---
+const readLog = () => { try { return cleanLog(JSON.parse(store.get('log', '[]'))); } catch { return []; } };
+const readWage = () => { const n = parseInt(store.get('wage', ''), 10); return n > 0 && n < 1e6 ? n : 0; };
+let workLog = readLog();
+let ownWage = readWage();   // 0: follow the legal minimum of the year on screen
+let persistAsked = false;
+let logLost = false;   // the last write did not reach storage (blocked or full): the log then lives in this page only
+const LOST = '이 브라우저에서는 기록을 저장할 수 없어요.\n창을 닫으면 사라져요.';
+const wageFor = (year) => ownWage || minWage(year);
+function writeLog(next) {
+  workLog = cleanLog(next);
+  const text = JSON.stringify(workLog);
+  store.set('log', text);
+  logLost = store.get('log', null) !== text;   // read back: the store helper swallows a refused write
+  if (persistAsked) return;
+  persistAsked = true;   // once there is something to lose, ask the browser not to evict it; either answer is fine
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch { /* not offered here */ }
+}
+// What each result on this page (a scan, or the hand-over) saved last: row → the entry it was saved as.
+const savedRows = new WeakMap();
+const rowsOf = (src) => (src && savedRows.get(src)) || new Map();
+// A batch from a schedule takes the place of
+//  - what the same result saved before for a row that has since been changed, is no longer on screen (the name
+//    was changed), or was unticked while rows saved before are being saved again (the week is saved over; when
+//    only changed or new rows are saved, the others were left out to add one shift after the rest, and stay);
+//  - other schedule entries on its dates, so a corrected week fixes those days;
+//  - anything whose hours overlap the new ones, so no hour is ever in the log twice.
+// A shift added by hand stays unless it overlaps. Returns how many were saved.
+function saveShifts(list, src) {
+  const batch = cleanLog(list.map((s) => ({ d: s.date, s: s.start, e: s.end })));
+  if (!batch.length) return 0;
+  const keys = new Set(batch.map(keyOf)), dates = new Set(batch.map((x) => x.d));
+  const rows = new Map(list.map((s) => [s, keyOf({ d: s.date, s: s.start, e: s.end })]).filter(([, k]) => keys.has(k)));
+  const before = rowsOf(src), live = src === scan ? shifts : list;
+  const again = [...rows].some(([s, k]) => before.get(s) === k), stale = new Set();
+  for (const [s, k] of before) if (rows.has(s) ? rows.get(s) !== k : again || !live.includes(s)) stale.add(k);
+  const out = (x) => !keys.has(keyOf(x)) && (stale.has(keyOf(x)) || (dates.has(x.d) && !x.m) || batch.some((n) => overlaps(x, n)));
+  writeLog(workLog.filter((x) => !out(x)).concat(batch));   // an entry equal to one of the batch is merged by the log itself
+  if (src) savedRows.set(src, new Map([...[...before].filter(([s, k]) => !stale.has(k) && !rows.has(s)), ...rows]));
+  return batch.length;
+}
+// One undo at a time. While a toast offers 되돌리기 this holds what to go back to: the log as it was, and what each
+// result had saved. Changes of the same kind made meanwhile (a second tap, a second delete) are undone together.
+let undoBase = null;
+function logChange(kind, src, run) {
+  if (undoBase && undoBase.kind !== kind) undoBase = null;
+  const base = undoBase || { kind, log: workLog.map((x) => ({ ...x })), rows: new Map(), note: '', gone: 0 };
+  if (src && !base.rows.has(src)) base.rows.set(src, new Map(rowsOf(src)));
+  const n = run(), now = new Set(workLog.map(keyOf));
+  base.gone = base.log.filter((x) => !now.has(keyOf(x))).length;
+  undoBase = base.gone ? base : null;
+  return n;
+}
+function undoLog(base) {
+  if (undoBase === base) undoBase = null;
+  writeLog(base.log);
+  for (const [src, rows] of base.rows) savedRows.set(src, rows);
+  if (page.dataset.view === 'month') paintMonth();
+}
+const monthReport = (month) => {
+  const asked = String(month || '').slice(0, 7), ym = YM_RE.test(asked) ? asked : viewYm;   // anything that is not a month means the month on screen
+  const entries = workLog.filter((x) => x.d.slice(0, 7) === ym).map((x) => ({ ...x })), t = tally(entries), wage = wageFor(+ym.slice(0, 4));
+  return { ym, entries, ...t, wage, ...payOf(t, wage), text: reportText(t) };
+};
+// A week can straddle New Year, so each year's shifts are paid at that year's wage. Minutes are added up
+// whole and each year is rounded once, the way the month is, so both views give the same won.
+const estimate = (entries) => [...new Set(entries.map((x) => x.d.slice(0, 4)))]
+  .reduce((sum, y) => sum + payOf(tally(entries.filter((x) => x.d.slice(0, 4) === y)), wageFor(+y)).pay, 0);
+
+// --- a toast that offers one action. A pending 되돌리기 is never lost to the next message: it is offered again with it ---
+const baseToast = toast;
+toast = (msg, ms) => {
+  if (undoBase) return offerUndo(undoBase.note ? msg + '\n' + undoBase.note : msg);
+  $('#toast').classList.remove('act'); baseToast(msg, ms);
+};
+// The action leaves with the toast, so nothing stays behind that a keyboard or a screen reader could still reach.
+function toastAction(msg, label, run, expire) {
+  baseToast(msg, 6500);
+  const t = $('#toast'), b = el('button', { type: 'button', textContent: label }), from = document.activeElement;
+  const drop = () => { b.remove(); if (!t.querySelector('button')) t.classList.remove('act'); };
+  const hide = () => {
+    if (t.contains(document.activeElement)) { toastTimer = setTimeout(hide, 1500); return; }   // in use from the keyboard: stays until focus moves on
+    t.classList.remove('show'); b.disabled = true;
+    toastTimer = setTimeout(() => { drop(); if (expire) expire(); }, 300);   // once it has faded
+  };
+  clearTimeout(toastTimer); toastTimer = setTimeout(hide, 6500);   // in place of the plain toast's timer, which would only fade it
+  b.addEventListener('click', () => {
+    const byKey = document.activeElement === b;
+    clearTimeout(toastTimer); t.classList.remove('show'); drop();
+    if (byKey && from && from.isConnected) from.focus({ preventScroll: true });   // back to where the keyboard was
+    run(byKey);
+  });
+  t.classList.add('act'); t.replaceChildren(el('span', { textContent: msg }), b);
+}
+// Offers to take the pending change back; `after` says what to do once the log is as it was.
+function offerUndo(msg, after) {
+  const base = undoBase;
+  toastAction(msg, '되돌리기', (byKey) => {
+    undoLog(base);
+    if (after) after(byKey); else toast(logLost ? LOST : '되돌렸어요. 기록이 저장하기 전으로 돌아갔어요.');
+  }, () => { if (undoBase === base) undoBase = null; });
+}
+
+// --- the weekly result: estimated pay of the chosen shifts, and saving them ---
+const figPay = $('#figPay');   // kept by reference: the week layer rewrites the text of the line it sits on
+function paintWeekPay() {
+  const list = chosen().map((s) => ({ d: s.date, s: s.start, e: s.end })), night = tally(list).nightMin;
+  figPay.hidden = $('#logRow').hidden = !list.length;
+  figPay.replaceChildren('예상 급여 ', el('b', { textContent: won(estimate(list)) + '원' }), night ? ` (야간 ${fmtH(night)}시간 포함)` : '');
+  if (figPay.parentNode !== $('#figSub')) $('#figSub').append(figPay);   // beside the range when the line has room, under it when not
+}
+const weekUpdate = updateAddButton;
+updateAddButton = () => { weekUpdate(); paintWeekPay(); };
+// What a save tells the worker: that it is done (or did not reach storage) and, when earlier entries made way
+// (an earlier schedule, a row unticked since, a shift whose hours overlap), how many, with the way back.
+function savedNote(n, done) {
+  if (!undoBase) { if (logLost) toast(LOST, 5000); else if (done) toast(done); return; }
+  undoBase.note = `전에 남긴 기록 ${undoBase.gone}건은 지웠어요.`;
+  offerUndo(`근무 ${n}건을 남겼어요.\n${undoBase.note}` + (logLost ? '\n' + LOST : ''));
+}
+// Their own listeners, after the ones that hand the calendar file over: a synchronous write that cannot throw
+const logAlso = (list, src, done) => {
+  try {
+    const n = logChange('save', src, () => saveShifts(list, src));
+    if (!n) return;
+    if (page.dataset.view === 'month') paintMonth();
+    savedNote(n, done && done(n));
+  } catch { /* the calendar hand-over goes on regardless */ }
+};
+const alsoSaved = (n) => `근무 ${n}건을 “월급 · 근무시간”에도 남겼어요.`;
+$('#addBtn').addEventListener('click', () => logAlso(chosen(), scan, alsoSaved));
+$('#incomingAdd').addEventListener('click', () => logAlso(incoming, incoming, alsoSaved));
+// The other ways the same shifts reach a calendar (file share, Google Calendar links, the copied Safari link) save them too, quietly
+$('#shareBtn').addEventListener('click', () => logAlso(chosen(), scan));
+$('#copyHandoff').addEventListener('click', () => logAlso(chosen(), scan));
+$('#gcalLinks').addEventListener('click', (e) => { if (e.target.closest('a')) logAlso(chosen(), scan); });
+$('#logOnly').addEventListener('click', () => {
+  if (!chosen().length) return toast('기록할 근무를 먼저 선택해 주세요.');
+  logAlso(chosen(), scan, (n) => `근무 ${n}건을 기록했어요. “월급 · 근무시간”에서 볼 수 있어요.`);
+});
+
+// --- the month on screen ---
+let thisYm = todayIso().slice(0, 7), viewYm = thisYm, jumpYm = '', dropIn = false;
+const monthRows = new Map();   // entry → its row in the list
+const wageEl = $('#wage');
+
+function paintWage(year, wage, settle) {
+  const known = wageYear(year), base = minWage(year);
+  if (settle || document.activeElement !== wageEl) wageEl.value = String(wage);   // never rewritten under the cursor
+  wageEl.placeholder = String(base);
+  $('#wageShow').textContent = won(wage);
+  const night = won(wage * NIGHT_RATE);
+  if ($('#nightWage').textContent !== night + '원') $('#nightWage').replaceChildren(night, el('i', { textContent: '원' }));
+  $('#wageReset').hidden = !ownWage;
+  $('#wageHint').textContent = (ownWage ? `직접 넣은 시급이에요. ${known}년 최저시급은 ${won(base)}원이에요.`
+    : known === year ? `${year}년 최저시급이에요.` : `${year}년 최저시급은 캘바에 없어서 ${known}년 금액으로 계산했어요.`)
+    + ' 야간은 밤 10시부터 새벽 1시까지로 계산해요.';
+}
+
+// One cell per day, weeks from Monday. A worked day is a green block with its hours; a crescent marks night work.
+function paintMonthBoard(r) {
+  const [y, m] = viewYm.split('-').map(Number), lead = (dowOf(viewYm + '-01') + 6) % 7, last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const today = todayIso(), perDay = new Map(), has = r.entries.length > 0;
+  for (const x of r.entries) {
+    const day = perDay.get(x.d) || { min: 0, night: 0, first: x };
+    day.min += span(x)[1] - span(x)[0]; day.night += nightMinutes(x.s, x.e);
+    perDay.set(x.d, day);
+  }
+  const head = el('div', { className: 'mo-head', ariaHidden: 'true' }, ...[1, 2, 3, 4, 5, 6, 0].map((d) => el('b', { textContent: DOW[d] })));
+  const grid = el('div', { className: 'mo-grid' });
+  for (let i = 0; i < lead; i++) grid.append(el('span'));
+  let nth = 0;
+  for (let d = 1; d <= last; d++) {
+    const iso = `${viewYm}-${pad2(d)}`, day = perDay.get(iso), at = lead + d - 1, num = el('i', { textContent: String(d) });
+    const cls = 'mo-c' + (iso === today ? ' today' : '');
+    if (!day) {
+      // An empty month shows where shifts will land, the way the first screen's week board does
+      const sample = !has && [1, 2].includes(Math.floor(at / 7)) && [0, 2, 4, 5].includes(at % 7);
+      grid.append(el('span', { className: cls + (sample ? ' ghost' : ''), ariaHidden: 'true' }, el('span', { className: 'mo-b' }, num)));
+      continue;
+    }
+    const blk = el('span', { className: 'mo-b' }, num, el('b', { className: fmtH(day.min).length > 3 ? 'sm' : '', textContent: fmtH(day.min) }));
+    if (day.night) blk.append(icon('moon'));
+    blk.style.setProperty('--i', nth++);
+    const btn = el('button', { type: 'button', className: cls + ' on' }, blk);
+    btn.setAttribute('aria-label', `${prettyDate(iso)}${iso === today ? ' 오늘' : ''}, ${fmtH(day.min)}시간` + (day.night ? `, 그중 야간 ${fmtH(day.night)}시간` : '') + '. 목록에서 보기');
+    btn.addEventListener('click', () => flashRow(monthRows.get(keyOf(day.first))));
+    grid.append(btn);
+  }
+  const mo = el('div', { className: 'mo' + (dropIn ? ' fresh' : '') }, head, grid);
+  if (has) {
+    mo.append(el('div', { className: 'wk-foot' }, el('span', { textContent: `근무 ${r.entries.length}건 · 칸의 숫자는 근무시간` }),
+      r.nightMin ? el('span', { className: 'lg' }, icon('moon'), '야간 근무') : ''));
+  }
+  $('#monthBoard').replaceChildren(mo, has ? '' : el('p', { className: 'ghost-tag', textContent: '캘린더에 추가한 근무가 채워져요' }));
+  dropIn = false;
+}
+
+function paintMonthList(r) {
+  monthRows.clear();
+  $('#monthList').replaceChildren(...r.entries.map((x) => {
+    const [a, b] = span(x), night = nightMinutes(x.s, x.e);
+    const when = el('span', {}, `${x.s} – ${x.e}`), sub = el('i', {}, `${fmtH(b - a)}시간`);
+    if (x.e <= x.s) when.append(el('small', { textContent: ' (다음 날)' }));
+    if (night) sub.append(' · ', icon('moon'), `야간 ${fmtH(night)}시간`);
+    const del = el('button', { type: 'button', className: 'mo-del' }, icon('trash'));
+    del.setAttribute('aria-label', `${prettyDate(x.d)} ${x.s}부터 ${x.e}까지 근무 지우기`);
+    del.addEventListener('click', () => removeEntry(x));
+    const li = el('li', { className: 'sh' }, el('div', { className: 'sh-row' }, dayCell(x.d), el('span', { className: 'sh-when' }, when, sub), del));
+    monthRows.set(keyOf(x), li);
+    return li;
+  }));
+}
+
+function paintMonth() {
+  const r = monthReport(viewYm), [y, m] = viewYm.split('-').map(Number), has = r.entries.length > 0;
+  if ($('#monthLabel').textContent !== `${y}년 ${m}월`) $('#monthLabel').textContent = `${y}년 ${m}월`;   // a live region: only spoken when the month changes
+  $('#month').classList.toggle('is-empty', !has);
+  $('#logLost').hidden = !logLost;
+  $('#mTotal').replaceChildren(el('b', { textContent: fmtH(r.totalMin) }), el('span', { textContent: '시간' }));
+  $('#mNightText').textContent = `야간 ${r.nightDays}일 · ${fmtH(r.nightMin)}시간`;
+  $('#mPay').textContent = won(r.pay) + '원';
+  $('#payBaseL').textContent = `일반 ${fmtH(r.totalMin - r.nightMin)}시간 × ${won(r.wage)}원`;
+  $('#payBase').textContent = won(r.basePay) + '원';
+  $('#payNightL').replaceChildren(icon('moon'), `야간 ${fmtH(r.nightMin)}시간 × ${won(r.wage * NIGHT_RATE)}원`);
+  $('#payNight').textContent = won(r.nightPay) + '원';
+  $('#report').textContent = r.text;
+  $('#monthEmpty').hidden = has;
+  $('#emptyTitle').textContent = workLog.length ? `${m}월에는 기록이 없어요` : '아직 기록이 없어요';
+  // From an empty month, one tap to the nearest month that has something: the last one before it, else the first after
+  const months = [...new Set(workLog.map((x) => x.d.slice(0, 7)))];
+  jumpYm = months.filter((ym) => ym < viewYm).pop() || months.find((ym) => ym > viewYm) || '';
+  $('#monthJump').hidden = has || !jumpYm;
+  $('#monthJump').textContent = (jumpYm.slice(0, 4) === viewYm.slice(0, 4) ? '' : jumpYm.slice(0, 4) + '년 ') + `${+jumpYm.slice(5)}월 기록 보기`;
+  paintWage(y, r.wage);
+  paintMonthBoard(r); paintMonthList(r);
+  $('#mbar').hidden = !has;   // nothing to send from an empty month
+  syncBar();
+}
+
+// The week view is where every visit starts; the month view replaces it on the page without touching its state
+function showView(name) {
+  const month = name === 'month', was = page.dataset.view === 'month';
+  page.dataset.view = month ? 'month' : 'week';
+  $('#tabWeek').setAttribute('aria-pressed', String(!month));
+  $('#tabMonth').setAttribute('aria-pressed', String(month));
+  if (month && thisYm !== todayIso().slice(0, 7)) viewYm = thisYm = todayIso().slice(0, 7);   // left open into a new month
+  // The week boards have had their entrance; without this it would play again each time the week view comes back
+  if (month && !was) for (const n of document.querySelectorAll('.wk.fresh, .wk-blk.pop')) n.classList.remove('fresh', 'pop');
+  if (month) { dropIn = !was; paintMonth(); }
+  syncBar();
+  if (month !== was) window.scrollTo(0, 0);
+}
+const setLog = (entries) => { undoBase = null; writeLog(entries); paintMonth(); if (scan) paintWeekPay(); };
+function stepMonth(n) {
+  const next = ymShift(viewYm, n);
+  if (next < '2000-01' || next > '2099-12') return;
+  viewYm = next; dropIn = true; paintMonth();
+}
+
+function removeEntry(x) {
+  const li = monthRows.get(keyOf(x)), at = [...$('#monthList').children].indexOf(li), focused = !!li && li.contains(document.activeElement);
+  logChange('delete', null, () => writeLog(workLog.filter((o) => keyOf(o) !== keyOf(x))));
+  logFail('');   // whatever the add form was saying may have been about this shift
+  paintMonth();
+  if (focused) {   // keyboard: on to the row that moved up, or to the month switch when the list is gone
+    const rest = $('#monthList').querySelectorAll('.mo-del');
+    (rest[Math.min(at, rest.length - 1)] || $('#monthPrev')).focus({ preventScroll: true });
+  }
+  if (!undoBase) return;
+  const n = undoBase.gone;   // more than one when rows are deleted in quick succession: they come back together
+  offerUndo(n > 1 ? `근무 ${n}건을 지웠어요.` : `${prettyDate(x.d)} 근무를 지웠어요.`, (byKey) => {
+    viewYm = x.d.slice(0, 7); paintMonth();
+    const row = monthRows.get(keyOf(x));
+    flashRow(row);
+    if (byKey && row) row.querySelector('.mo-del').focus({ preventScroll: true });
+    toast(logLost ? LOST : n > 1 ? `${n}건을 다시 넣었어요.` : '다시 넣었어요.');
+  });
+}
+
+// --- wiring of the month view ---
+$('#tabWeek').addEventListener('click', () => showView('week'));
+$('#tabMonth').addEventListener('click', () => showView('month'));
+// A button that goes away when pressed passes the focus on, or keyboard and screen-reader users land at the top of the page
+$('#monthGo').addEventListener('click', () => { showView('week'); $('#tabWeek').focus({ preventScroll: true }); });
+$('#monthPrev').addEventListener('click', () => stepMonth(-1));
+$('#monthNext').addEventListener('click', () => stepMonth(1));
+$('#monthJump').addEventListener('click', () => { if (jumpYm) { viewYm = jumpYm; dropIn = true; paintMonth(); $('#monthPrev').focus({ preventScroll: true }); } });
+// The two lines that were copied: brought clear of the toast (it lands just above the bar) and outlined once
+function showCopied() {
+  const rep = $('#report'), r = rep.getBoundingClientRect();
+  if (r.top < 8 || r.bottom > innerHeight - $('#mbar').offsetHeight - 96) glide(rep, 'center');
+  rep.classList.remove('flash'); void rep.offsetWidth; rep.classList.add('flash');
+  clearTimeout(rep._f); rep._f = setTimeout(() => rep.classList.remove('flash'), 1300);
+}
+$('#copyReport').addEventListener('click', async () => {
+  const text = monthReport(viewYm).text;
+  try { await navigator.clipboard.writeText(text); showCopied(); toast('보낼 내용을 복사했어요. 대화창에 붙여 넣어 주세요.'); }
+  catch {
+    // Left selected, so the system's own "copy" is one tap away
+    try { const sel = getSelection(), range = document.createRange(); range.selectNodeContents($('#report')); sel.removeAllRanges(); sel.addRange(range); } catch { /* no selection here */ }
+    glide($('#report'), 'center');
+    toast('복사하지 못했어요.\n선택된 내용을 길게 눌러 직접 복사해 주세요.', 5000);
+  }
+});
+
+// Hourly wage: the field takes digits only; an empty field or the year's own minimum means "follow the minimum wage"
+function setWage(n) {
+  ownWage = n > 0 && n < 1e6 && n !== minWage(+viewYm.slice(0, 4)) ? n : 0;
+  store.set('wage', ownWage ? String(ownWage) : '');
+  paintMonth();
+  if (scan) paintWeekPay();
+}
+// The wage is the digits before a decimal point. A typed point stays in the field until it is left, so that
+// digits typed after it stay behind it and are not counted (10320.5 is 10,320원, not 103,205원).
+const wageParts = () => {
+  const [whole, ...rest] = wageEl.value.split('.');
+  return [whole.replace(/\D/g, '').replace(/^0+/, '').slice(0, 6), rest.length ? '.' + rest.join('').replace(/\D/g, '') : ''];
+};
+const wageDigits = () => wageParts()[0];
+wageEl.addEventListener('input', () => {
+  const shown = wageParts().join('');
+  if (wageEl.value !== shown) wageEl.value = shown;   // something other than a digit was typed or pasted
+  setWage(+wageDigits());
+});
+wageEl.addEventListener('change', () => setWage(+wageDigits()));
+wageEl.addEventListener('blur', () => paintWage(+viewYm.slice(0, 4), wageFor(+viewYm.slice(0, 4)), true));   // an emptied field shows the wage in use again
+wageEl.addEventListener('focus', () => { try { wageEl.select(); } catch { /* nothing to select */ } });
+wageEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') wageEl.blur(); });
+$('#wageReset').addEventListener('click', () => { setWage(0); $('#wageHint').focus({ preventScroll: true }); });   // not the field: that would raise the keyboard
+
+// Adding a shift by hand. It is added next to what is there (a day can hold two shifts), never over it.
+const logDate = $('#logDate'), logStart = $('#logStart'), logEnd = $('#logEnd');
+const logFail = (msg) => { $('#logErr').textContent = msg; $('#logErr').hidden = !msg; };
+function paintLogPreview() {
+  const s = logStart.value.slice(0, 5), e = logEnd.value.slice(0, 5), ok = TIME_RE.test(s) && TIME_RE.test(e) && s !== e, p = $('#logPreview');
+  p.hidden = !ok;
+  if (!ok) return;
+  const [a, b] = spanOf({ start: s, end: e }), night = nightMinutes(s, e);
+  p.textContent = `${s} – ${e}` + (e <= s ? ' (다음 날)' : '') + ` · ${fmtH(b - a)}시간` + (night ? ` · 야간 ${fmtH(night)}시간` : '');
+}
+for (const input of [logDate, logStart, logEnd]) {
+  input.addEventListener('input', () => { logFail(''); paintLogPreview(); });
+  input.addEventListener('change', paintLogPreview);
+}
+$('#logFold').addEventListener('toggle', () => {   // opens on a date in the month being looked at
+  if (!$('#logFold').open || logDate.value) return;
+  logDate.value = todayIso().slice(0, 7) === viewYm ? todayIso() : viewYm + '-01';
+});
+$('#logAdd').addEventListener('click', () => {
+  const x = { d: logDate.value, s: logStart.value.slice(0, 5), e: logEnd.value.slice(0, 5) };
+  const missing = [[x.d, '날짜'], [x.s, '시작 시간'], [x.e, '종료 시간']].filter(([v]) => !v).map(([, what]) => what);
+  if (missing.length) return logFail(`${missing.join(', ')}${missing[missing.length - 1] === '날짜' ? '를' : '을'} 넣어 주세요.`);
+  if (parseDate(x.d) !== x.d || !TIME_RE.test(x.s) || !TIME_RE.test(x.e)) return logFail('날짜와 시간을 다시 확인해 주세요.');
+  if (x.s === x.e) return logFail('시작과 종료 시간이 같아요. 서로 다르게 넣어 주세요.');
+  if (workLog.some((o) => keyOf(o) === keyOf(x))) return logFail('이미 기록에 있는 근무예요.');
+  const clash = workLog.find((o) => overlaps(o, x));
+  if (clash) return logFail(`${prettyDate(clash.d)} ${clash.s} – ${clash.e} 근무와 시간이 겹쳐요. 그 근무를 먼저 지워 주세요.`);
+  logFail('');
+  undoBase = null;
+  writeLog(workLog.concat({ ...x, m: 1 }));
+  viewYm = x.d.slice(0, 7); paintMonth();
+  flashRow(monthRows.get(keyOf(x)));
+  toast(logLost ? LOST : `${prettyDate(x.d)} ${x.s} – ${x.e} 근무를 추가했어요.`);
+});
+
+// A pasted, dropped or shared image is always read in the week view
+const weekHandle = handleImage;
+handleImage = (blob) => { if (!busy) showView('week'); return weekHandle(blob); };
+// The same log changed in another tab of this browser
+window.addEventListener('storage', (e) => {
+  if (e.key && e.key !== 'shiftcal.log' && e.key !== 'shiftcal.wage') return;
+  undoBase = null; workLog = readLog(); ownWage = readWage();
+  if (page.dataset.view === 'month') paintMonth();
+  if (scan) paintWeekPay();
+});
+if ('ResizeObserver' in window) new ResizeObserver(syncBar).observe($('#mbar'));
+/* ---------- end of the month view ---------- */
+
 // Hook for local testing
-window.shiftApp = { handleImage, buildIcs, handoffUrl, state: () => ({ scan, shifts }) };
+window.shiftApp = { handleImage, buildIcs, handoffUrl, state: () => ({ scan, shifts }), showView, getLog: () => workLog.map((x) => ({ ...x })), setLog, monthReport, nightMinutes };
 })();
 </script>
 </body>
