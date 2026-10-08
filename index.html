@@ -981,7 +981,7 @@ shiftItem = (s) => {
   };
   when.className = 'sh-when'; when.firstChild.hidden = true; when.append(sub);
   flags.forEach((f) => { f.className = 'sh-flag'; });
-  edit.className = 'ed'; edit.open = !s.date; edit.firstChild.prepend(icon('pen'));
+  edit.className = 'ed'; edit.open = !usable(s); edit.firstChild.prepend(icon('pen'));
   const more = el('div', { className: 'sh-more', hidden: !flag }, el('p', { className: 'cap', textContent: '원본 스케줄표에서 잘라 온 칸' }), thumb, edit);
   const main = el('button', { type: 'button', className: 'sh-main' }, day, when, icon('chev'));
   main.setAttribute('aria-expanded', String(flag));
@@ -1243,6 +1243,12 @@ function parseTime(text) {
   if (sh > 24 || eh > 24 || sm > 59 || em > 59) return null;
   return { start: pad2(sh % 24) + ':' + pad2(sm), end: pad2(eh % 24) + ':' + pad2(em) };
 }
+// The signs a digit is most often read as: O for 0, l for 1, and for a 7 a slash, in its place or beside it.
+// Only tried when a cell gave no time as it was read.
+function repairTime(text) {
+  const t = text.replace(/[Oo]/g, '0').replace(/[Il|!]/g, '1');
+  return parseTime(t.replace(/\//g, '7')) || parseTime(t.replace(/\//g, ''));
+}
 function parseDate(text) {
   const m = text.match(/(20\d{2})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{1,2})/);
   if (!m) return null;
@@ -1276,7 +1282,8 @@ function buildTokens(words, scale) {
     r.ws.sort((a, b) => a.x0 - b.x0);
     let cur = null;
     for (const w of r.ws) {
-      if (cur && w.x0 - cur.x1 < r.h * 0.8) {
+      // A word that is a whole time on its own starts a cell: the date label right beside the first column must not swallow it
+      if (cur && w.x0 - cur.x1 < r.h * 0.8 && !parseTime(w.t)) {
         cur.t += w.t; cur.x1 = Math.max(cur.x1, w.x1); cur.y0 = Math.min(cur.y0, w.y0); cur.y1 = Math.max(cur.y1, w.y1);
       } else tokens.push(cur = { t: w.t, x0: w.x0, y0: w.y0, x1: w.x1, y1: w.y1 });
     }
@@ -1393,7 +1400,9 @@ async function scanImage(image) {
     const c = colSeen[colSeen.length - 1];
     if (c && t.cx - c.cx < colW * 0.5) { c.n++; c.cx += (t.cx - c.cx) / c.n; } else colSeen.push({ cx: t.cx, n: 1 });
   }
-  const colXs = fillSteps(colSeen.map((c) => c.cx), colW, Infinity, W - colW * 0.25);
+  // To the left as well, as far as a whole column fits: when the first column was skipped in every row
+  // it would otherwise be left out altogether. A column laid over the date labels reads no time and drops out.
+  const colXs = fillSteps(colSeen.map((c) => c.cx), colW, colW * 0.6, W - colW * 0.25);
   const grid = fillSteps(rows.map((r) => r.cy), rowGap, pitch * 1.6, H - pitch * 0.4).map((cy) => ({ cy, date: null, dateGuess: false }));
   const entries = [];
   grid.forEach((r, i) => colXs.forEach((x) => {
@@ -1402,13 +1411,13 @@ async function scanImage(image) {
     entries.push({ row: i, cx: at.cx, cy: at.cy, time: t ? t.time : null, filled: !t, pass1: above(at, pitch * 0.5, pitch * 1.5) });
   }));
 
-  // Pass 2: read each name cell on its own, plus skipped time cells and each row's date cell
+  // Pass 2: read each name cell and each time cell on its own, plus each row's date cell
   const S = clamp(60 / pitch, 1, 4);
   const cell = (cx, cy) => cleanCrop(src, cx - colW * 0.46, cy - pitch * 0.39, colW * 0.92, pitch * 0.78, S);
   const jobs = [];
   for (const e of entries) {
     jobs.push({ kind: 'name', e, crop: cell(e.cx, e.cy - pitch) });
-    if (!e.time) jobs.push({ kind: 'time', e, crop: cell(e.cx, e.cy) });
+    jobs.push({ kind: 'time', e, crop: cell(e.cx, e.cy) });
   }
   // A day's date label can sit beside its names, beside its times or between the two: take the whole cell
   if (hasDateCol) for (const r of grid) jobs.push({ kind: 'date', r, crop: cleanCrop(src, 2, r.cy - pitch * 1.45, leftBound - 4, pitch * 1.9, S) });
@@ -1417,9 +1426,24 @@ async function scanImage(image) {
   const read = [...await ocrCrops(worker, cells.map((j) => j.crop), 0.65, 0.29), ...await ocrCrops(worker, labels.map((j) => j.crop), 0.94, 0.04)];
   jobs.forEach((j, k) => {
     if (j.kind === 'name') j.e.names = [read[k], j.e.pass1 ? j.e.pass1.t : ''].map(cleanName).filter(Boolean);
-    else if (j.kind === 'time') j.e.time = parseTime(read[k]);
-    else j.r.date = parseDate(read[k]);
+    else if (j.kind === 'time') {
+      // A blurred 2 reads as 0 and an 8 as 6, and the result is still a time. Each cell is read twice, and
+      // the two reads have to agree; when they do not, the closer look is kept and the shift is flagged.
+      const first = j.e.time, again = parseTime(read[k]) || repairTime(read[k]);
+      j.e.unsure = !first || !again || first.start !== again.start || first.end !== again.end;
+      j.e.time = again || first;
+    } else j.r.date = parseDate(read[k]);
   });
+  // Two reads can also agree on the same wrong digit. Hours that make no shift (under one, over twelve)
+  // and minutes that hardly any other cell has are flagged as well.
+  const minuteCount = new Map();
+  const minutesOf = (t) => [t.start.slice(3), t.end.slice(3)];
+  for (const e of entries) if (e.time) for (const m of minutesOf(e.time)) minuteCount.set(m, (minuteCount.get(m) || 0) + 1);
+  for (const e of entries) {
+    if (!e.time) continue;
+    const [a, b] = spanOf(e.time);
+    if (b - a < 60 || b - a > 720 || minutesOf(e.time).some((m) => m !== '00' && m !== '30' && minuteCount.get(m) < 3)) e.unsure = true;
+  }
 
   // Dates: the row's own label first, then a label read in pass 1, then count from a neighbour
   const leftDates = tokens.filter((t) => t.date && t.cx < leftBound);
@@ -1428,6 +1452,17 @@ async function scanImage(image) {
     const mid = r.cy - pitch / 2;
     const near = leftDates.filter((t) => Math.abs(t.cy - mid) < pitch).sort((a, b) => Math.abs(a.cy - mid) - Math.abs(b.cy - mid))[0];
     if (near) r.date = near.date;
+  }
+  // Days run in order, one row each. A label read as another real date (10.08 as 10.06) would put that
+  // day's shifts on the wrong day without a word. A row that breaks the run while the rows on both sides
+  // of it agree (at either end of the table: the two rows next to it) is put back in line and flagged.
+  const dayNo = (iso) => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+  const inLine = (i, j) => !!(grid[i] && grid[j] && grid[i].date && grid[j].date) && dayNo(grid[j].date) - dayNo(grid[i].date) === j - i;
+  const dated = grid.map((r, i) => (r.date ? i : -1)).filter((i) => i >= 0);
+  for (const i of dated) {
+    const from = inLine(i - 1, i + 1) ? i - 1 : i === dated[0] && inLine(i + 1, i + 2) ? i + 1 : i === dated[dated.length - 1] && inLine(i - 2, i - 1) ? i - 1 : -1;
+    if (from < 0 || inLine(Math.min(from, i), Math.max(from, i))) continue;
+    grid[i].date = addDays(grid[from].date, i - from); grid[i].dateGuess = true;
   }
   const anchors = grid.map((r, i) => (r.date ? i : -1)).filter((i) => i >= 0);
   const header = tokens.filter((t) => t.date && t.cx >= leftBound && t.cy < grid[0].cy - pitch).sort((a, b) => a.cy - b.cy)[0];
@@ -1440,11 +1475,16 @@ async function scanImage(image) {
     r.dateGuess = !!r.date;
   });
 
-  return { src, W, H, rows: grid, entries: entries.filter((e) => e.time), geom: { colW, pitch, leftBound, hasDateCol } };
+  // A cell with a name but no readable time is kept apart: it is not a shift yet, but if the name is
+  // mine it must not vanish, so it is shown with the time left to fill in.
+  const loose = entries.filter((e) => !e.time && e.names.some(isName));
+  return { src, W, H, rows: grid, entries: entries.filter((e) => e.time), loose, geom: { colW, pitch, leftBound, hasDateCol } };
 }
 
 /* ---------- finding my shifts ---------- */
 const cleanName = (s) => (s || '').replace(/[^가-힣A-Za-z]/g, '');
+// What a name on a schedule looks like. Hangul mixed with Latin, or a long run of syllables, is a misreading.
+const isName = (n) => /^[가-힣]{2,4}$/.test(n) || /^[A-Za-z]{3,}$/.test(n);
 function jamo(s) {
   let out = '';
   for (const ch of s) {
@@ -1472,17 +1512,17 @@ function findShifts(scan, rawName) {
   const seen = new Map();
   for (const e of scan.entries) if (e.names[0]) seen.set(e.names[0], (seen.get(e.names[0]) || 0) + 1);
   const out = [];
-  for (const e of scan.entries) {
+  for (const e of [...scan.entries, ...scan.loose]) {
     let dist = Infinity;
     for (const n of e.names) dist = Math.min(dist, n.includes(target) ? 0 : lev(jamo(n), tj));
-    if (dist > limit) continue;
+    if (dist > (e.time ? limit : Math.min(limit, 1))) continue;
     // A loose match that reads cleanly as another name (seen twice, or both OCR
     // passes agree) is a coworker with a similar name, not a misreading of mine.
     if (dist >= 2 && (seen.get(e.names[0]) > 1 || e.names[0] === e.names[1])) continue;
     const row = scan.rows[e.row];
     out.push({
-      entry: e, date: row.date || '', start: e.time.start, end: e.time.end,
-      fuzzy: dist > 0, dateGuess: row.dateGuess, timeUnsure: e.filled, read: e.names[0] || '', checked: dist <= 1,
+      entry: e, date: row.date || '', start: e.time ? e.time.start : '', end: e.time ? e.time.end : '',
+      fuzzy: dist > 0, dateGuess: row.dateGuess, timeUnsure: !e.time || e.unsure, read: e.names[0] || '', checked: dist <= 1,
     });
   }
   out.sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
@@ -1592,14 +1632,15 @@ function shiftItem(s) {
   const title = el('b'), sub = el('span');
   const paint = () => {
     title.textContent = prettyDate(s.date);
-    sub.textContent = `${s.start} – ${s.end}` + (s.end <= s.start ? ' (다음 날)' : '');
+    sub.textContent = s.start && s.end ? `${s.start} – ${s.end}` + (s.end <= s.start ? ' (다음 날)' : '') : '시간 없음';
   };
   paint();
   const check = el('input', { type: 'checkbox', checked: s.checked, ariaLabel: '이 근무 추가' });
   check.addEventListener('change', () => { s.checked = check.checked; updateAddButton(); });
   li.append(el('div', { className: 'row' }, check, el('div', { className: 'when' }, title, sub)));
   if (s.fuzzy) li.append(el('span', { className: 'badge', textContent: `이름이 “${s.read}”(으)로 읽혔어요 · 아래 그림 확인` }));
-  if (s.timeUnsure) li.append(el('span', { className: 'badge', textContent: '시간이 흐리게 읽혔어요 · 아래 그림 확인' }));
+  if (!s.start || !s.end) li.append(el('span', { className: 'badge', textContent: '시간을 못 읽었어요 · 직접 입력' }));
+  else if (s.timeUnsure) li.append(el('span', { className: 'badge', textContent: '시간이 흐리게 읽혔어요 · 아래 그림 확인' }));
   if (!s.date) li.append(el('span', { className: 'badge', textContent: '날짜를 못 읽었어요 · 직접 입력' }));
   else if (s.dateGuess) li.append(el('span', { className: 'badge', textContent: '날짜는 순서로 추정했어요' }));
   const thumb = el('canvas', { className: 'thumb' });
@@ -1618,10 +1659,21 @@ function shiftItem(s) {
   li.append(edit);
   return li;
 }
+// The names to pick from. One person misread three ways (박병훈, 박병운, 박병푼) is one name, not three:
+// every cell votes with both of its reads, a reading one jamo away from a better-attested one is that
+// name misread, and each cell then counts as the best-attested name among its reads.
 function knownNames() {
-  const count = new Map();
-  for (const e of scan.entries) if (e.names[0] && e.names[0].length >= 2) count.set(e.names[0], (count.get(e.names[0]) || 0) + 1);
-  return [...count.keys()].sort((a, b) => a.localeCompare(b, 'ko'));
+  const votes = new Map();
+  const cells = scan.entries.map((e) => [...new Set(e.names.filter(isName))]).filter((c) => c.length);
+  for (const c of cells) for (const n of c) votes.set(n, (votes.get(n) || 0) + 1);
+  const byVotes = [...votes.keys()].sort((a, b) => votes.get(b) - votes.get(a)), same = new Map();
+  for (const n of byVotes) {
+    const j = jamo(n);
+    same.set(n, byVotes.find((m) => same.has(m) && same.get(m) === m && votes.get(m) > votes.get(n) && lev(jamo(m), j) <= 1) || n);
+  }
+  const strength = (n) => votes.get(same.get(n));
+  const picked = new Set(cells.map((c) => same.get(c.reduce((a, b) => (strength(b) > strength(a) ? b : a)))));
+  return [...picked].sort((a, b) => a.localeCompare(b, 'ko'));
 }
 function render() {
   if (!scan) return;
@@ -1636,8 +1688,8 @@ function render() {
     : sure ? `“${name}” 근무 ${sure}건` : `“${name}” 대신 비슷한 이름만 찾았어요`;
   const unsure = shifts.filter((s) => s.fuzzy || s.dateGuess || s.timeUnsure || !s.date).length;
   const notes = [];
-  // Rows under ~17px mean letters only a few pixels tall (a screenshot of a zoomed-out image)
-  if (scan.geom.pitch < 17) notes.push('이미지가 작아서 잘못 읽을 수 있어요. 화면 캡처 대신 원본 이미지를 넣으면 더 정확해요.');
+  // Rows under ~21px mean letters under 10px tall (a screenshot of a zoomed-out image): names start to go wrong there
+  if (scan.geom.pitch < 21) notes.push('이미지가 작아서 잘못 읽을 수 있어요. 화면 캡처 대신 원본 이미지를 넣으면 더 정확해요.');
   if (unsure) notes.push(`확인이 필요한 항목이 ${unsure}건 있어요. 잘라 보여 드린 원본 그림과 비교해 주세요.`);
   const note = $('#resultNote');
   note.hidden = !notes.length;
